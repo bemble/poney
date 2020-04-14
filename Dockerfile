@@ -16,8 +16,6 @@ ARG BASE_PATH=/
 WORKDIR /usr/src/app
 COPY . .
 
-RUN rm -f server/package-lock.json front/package-lock.json
-
 WORKDIR /usr/src/app/front
 RUN node -p -e "const conf = require(__dirname + '/package.json'); const fs = require('fs'); conf.homepage = '/poney'; fs.writeFileSync(__dirname + '/package.json', JSON.stringify(conf, null, 2));"
 RUN npm install
