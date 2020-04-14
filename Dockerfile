@@ -1,7 +1,6 @@
 FROM node:10-alpine
 RUN apk add tzdata
 
-
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
 RUN set -x \
