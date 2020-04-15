@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "prestart": "db-migrate up && node scripts/set-base-path-front.js && node scripts/launch-batch credit-card-calendar",
+    "prestart": "db-migrate up && node scripts/set-base-path-front.js && node scripts/launch-batch.js credit-card-calendar",
     "start": "node src/index.js",
     "prestart:dev": "db-migrate up",
     "start:dev": "APP_ENVIRONMENT=dev nodemon src/index.js"
