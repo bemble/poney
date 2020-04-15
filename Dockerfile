@@ -28,7 +28,7 @@ ENV PORT 3100
 EXPOSE 3100
 
 RUN echo '*/15 * * * * node /usr/src/app/server/scripts/launch-batch.js linxo-importer' > /etc/crontabs/root
-RUN echo '30 0 * * 7 node /usr/src/app/server/scripts/launch-batch.js credit-card-calendar' >> /etc/crontabs/root
+RUN echo '30 0 * * 6 node /usr/src/app/server/scripts/launch-batch.js credit-card-calendar' >> /etc/crontabs/root
 
 WORKDIR /usr/src/app/server
-CMD /usr/sbin/crond -f && BASE_PATH=${BASE_PATH} npm run start
+CMD /usr/sbin/crond -f && BASE_PATH=${BASE_PATH} npm start
