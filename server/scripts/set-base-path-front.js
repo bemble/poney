@@ -33,16 +33,3 @@ files.forEach(file => {
 });
 
 console.log("Base path successfully set.");
-
-/*
-let index = fs.readFileSync('../front/build/index.html', {encoding: 'utf8'});
-    // JS
-    index = index.replace(/script src="\//g, "script src=\"./");
-    // CSS
-    index = index.replace(/href="\//g, "href=\"./");
-    // base
-    index = index.replace(/base href="[^"]+"/, `base href="${process.env.BASE_PATH}/"`);
-
-    app.use(`${process.env.BASE_PATH}/index.html`, (req, res) => res.set('Content-Type', 'text/html').send(index));
-    app.use(`${process.env.BASE_PATH}/`, express.static('../front/build'));
- */
