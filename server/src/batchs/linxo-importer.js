@@ -9,6 +9,45 @@ const Database = require('../core/Database');
 const downloadPath = `/tmp`;
 const headless = true;
 
+const SCRIPT_NAME = "linxo-importer";
+
+module.exports = async () => {
+    const db = await Database;
+
+    const {currentStatus} = await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`);
+    if(currentStatus === 2) {
+        console.log('A Linxo import task is already in process, aborting.');
+        process.exit(0);
+    }
+
+    console.log('Starting import data from Linxo...');
+    await db.run(`INSERT OR
+                   REPLACE INTO batchHistory
+                     (script, status, message, lastRunnedAt)
+                   VALUES
+                     (?, ?, ?, ?)`, [SCRIPT_NAME, 2, null, Database.currentTimestamp()]);
+
+    let hasError = true;
+    let retries = 3;
+    let lastError = null;
+    while (hasError && retries > 0) {
+        try {
+            await LinxoImporter.process();
+            hasError = false;
+        } catch (e) {
+            lastError = e.message;
+            retries--;
+        }
+    }
+
+    await db.run(`INSERT OR
+                   REPLACE INTO batchHistory
+                     (script, status, message, lastRunnedAt)
+                   VALUES
+                     (?, ?, ?, ?)`, [SCRIPT_NAME, hasError ? 1 : 0, hasError ? lastError : null, Database.currentTimestamp()]);
+    console.log('Task finished.');
+};
+
 class LinxoImporter {
     static async process() {
         const importer = new LinxoImporter();
@@ -115,24 +154,3 @@ class LinxoImporter {
         browser.close();
     }
 }
-
-module.exports = async () => {
-    let hasError = true;
-    let retries = 3;
-    let lastError = null;
-    while (hasError && retries > 0) {
-        try {
-            await LinxoImporter.process();
-            hasError = false;
-        } catch (e) {
-            lastError = e.message;
-            retries--;
-        }
-    }
-    const db = await Database;
-    return db.run(`INSERT OR
-                   REPLACE INTO batchHistory
-                     (script, status, message, lastRunnedAt)
-                   VALUES
-                     (?, ?, ?, ?)`, ['linxo-importer', hasError ? 1 : 0, hasError ? lastError : null, Database.currentTimestamp()]);
-};

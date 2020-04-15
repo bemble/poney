@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "prestart": "db-migrate up && node scripts/set-base-path-front.js",
+    "prestart": "db-migrate up && node scripts/set-base-path-front.js && node scripts/launch-batch credit-card-calendar",
     "start": "node src/index.js",
     "prestart:dev": "db-migrate up",
     "start:dev": "APP_ENVIRONMENT=dev nodemon src/index.js"
@@ -20,7 +20,6 @@
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
-    "node-cron": "^2.0.3",
     "puppeteer": "^1.19.0",
     "sha1": "^1.1.1",
     "sqlite": "^3.0.3"

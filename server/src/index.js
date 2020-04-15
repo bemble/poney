@@ -1,8 +1,4 @@
 const fs = require('fs');
-const cron = require('node-cron');
-const importLinxo = require('./batchs/linxo-importer');
-const creditCardCalendar = require('./batchs/credit-card-calendar');
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
@@ -35,11 +31,7 @@ http.listen(PORT, () => {
     console.log(`Running on port ${PORT}. Home url: http://localhost:${PORT}${BASE_PATH}`);
 });
 
-(async () => {
-    await creditCardCalendar();
-})();
-
-if (process.env.APP_ENVIRONMENT !== "dev") {
+/*if (process.env.APP_ENVIRONMENT !== "dev") {
     cron.schedule('0 * * * *', () => {
         (async () => {
             try {
@@ -56,11 +48,10 @@ if (process.env.APP_ENVIRONMENT !== "dev") {
         (async () => {
             try {
                 await creditCardCalendar();
-                console.log('Credit card calendar updated.');
             } catch (e) {
                 console.error(e);
             }
         })();
     });
     console.log('Deferred credit card calendar will be updated every sunday, if necessary.');
-}
+}*/

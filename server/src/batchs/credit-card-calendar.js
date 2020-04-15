@@ -8,8 +8,23 @@ const getBusinessDayDateClosestTo = (expectedMoment) => {
     return expectedMoment.subtract((expectedMoment.day() % 5), 'days').date();
 };
 
+const SCRIPT_NAME = "credit-card-calendar";
+
 module.exports = async () => {
     const db = await Database;
+
+    const {currentStatus} = await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`);
+    if(currentStatus === 2) {
+        console.log('A credit card calendar update task is already in process, aborting.');
+        process.exit(0);
+    }
+
+    console.log('Starting updating credit card calendar...');
+    await db.run(`INSERT OR
+                   REPLACE INTO batchHistory
+                     (script, status, message, lastRunnedAt)
+                   VALUES
+                     (?, ?, ?, ?)`, [SCRIPT_NAME, 2, null, Database.currentTimestamp()]);
 
     const firstData = await db.get(`SELECT *
                                     FROM rawData
@@ -39,9 +54,10 @@ module.exports = async () => {
         await Promise.all(insertPromises);
     }
 
-    return db.run(`INSERT OR
+    await db.run(`INSERT OR
                    REPLACE INTO batchHistory
                      (script, status, message, lastRunnedAt)
                    VALUES
-                     (?, ?, ?, ?)`, ['credit-card-calendar', 0, null, Database.currentTimestamp()]);
+                     (?, ?, ?, ?)`, [SCRIPT_NAME, 0, null, Database.currentTimestamp()]);
+    console.log('Task finished.');
 };
