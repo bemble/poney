@@ -56,8 +56,8 @@ class Api {
             options.body = JSON.stringify(options.body);
         }
 
-        if (!path.startsWith("/public") && !options.headers.Auhtorization) {
-            options.headers["Auhtorization"] = `Bearer ${store.getState().token}`;
+        if (!path.startsWith("/public") && !options.headers.Authorization) {
+            options.headers["Authorization"] = `Bearer ${store.getState().token}`;
         }
 
         let basePath = process.env.PUBLIC_URL;
