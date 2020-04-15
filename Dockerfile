@@ -17,10 +17,9 @@ WORKDIR /usr/src/app
 COPY . .
 
 WORKDIR /usr/src/app/front
-RUN node -p -e "const conf = require(__dirname + '/package.json'); const fs = require('fs'); conf.homepage = '/poney'; fs.writeFileSync(__dirname + '/package.json', JSON.stringify(conf, null, 2));"
 RUN npm install
 RUN BASE_PATH=${BASE_PATH} npm run build
-RUN rm -rf src node_modules public .git .gitignore package* README.md
+RUN rm -rf src node_modules public .git .gitignore README.md
 
 WORKDIR /usr/src/app/server
 RUN npm install --no-dev
