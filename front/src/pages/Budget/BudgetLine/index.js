@@ -28,7 +28,7 @@ const useStyle = makeStyles({
         textAlign: "center"
     },
     tools: {
-        width: 44
+        width: 56
     }
 });
 
@@ -49,7 +49,7 @@ export default React.memo((props) => {
         "categories": {possibleValues: linxoCategories, grouped: true},
         "dayOfMonth": {}
     };
-    return <TableRow style={{backgroundColor: color}}>
+    return <TableRow hover>
         <TableCell size="small" className={classes.tools}>
             <Tools {...{...props, id, initialId: id}} onColorChanged={(hex) => setColor(hex)} />
         </TableCell>
