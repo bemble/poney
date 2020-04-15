@@ -32,11 +32,10 @@ http.listen(PORT, () => {
 });
 
 /*if (process.env.APP_ENVIRONMENT !== "dev") {
-    cron.schedule('0 * * * *', () => {
+    cron.schedule('5 8-21 * * 0-6', () => {
         (async () => {
             try {
-                await importLinxo();
-                console.log('Data imported');
+
             } catch (e) {
                 console.error(e);
             }

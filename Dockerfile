@@ -1,4 +1,4 @@
-FROM node:10-alpine
+FROM node:12-alpine3.11
 RUN apk add tzdata
 
 ENV CHROME_BIN="/usr/bin/chromium-browser" \
@@ -27,8 +27,8 @@ RUN npm install --no-dev
 ENV PORT 3100
 EXPOSE 3100
 
-RUN echo '0 * * * *   /usr/src/app/server/scripts/launch-batch.js linxo-importer' > /etc/crontabs/root
-RUN echo '30 0 * * 7   /usr/src/app/server/scripts/launch-batch.js credit-card-calendar' >> /etc/crontabs/root
+RUN echo '45 7-21 * * 0-6   /usr/src/app/server/scripts/launch-batch.js linxo-importer' > /var/spool/cron/crontabs/root
+RUN echo '30 0 * * 7   /usr/src/app/server/scripts/launch-batch.js credit-card-calendar' >> /var/spool/cron/crontabs/root
 CMD ['crond', '-l 2', '-f']
 
 WORKDIR /usr/src/app/server
