@@ -36,5 +36,4 @@ RUN echo 'BASE_PATH=$1 npm --prefix /usr/src/app/server prestart' >> /usr/src/ap
 RUN echo 'BASE_PATH=$1 node /usr/src/app/server/src/index.js' >> /usr/src/app/start.sh
 RUN chmod +x /usr/src/app/start.sh
 
-WORKDIR /usr/src/app
-CMD start.sh ${BASE_PATH}
+CMD /usr/src/app/start.sh ${BASE_PATH}
