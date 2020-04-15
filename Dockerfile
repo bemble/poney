@@ -27,8 +27,14 @@ RUN npm install --no-dev
 ENV PORT 3100
 EXPOSE 3100
 
-RUN echo '*/15 * * * * node /usr/src/app/server/scripts/launch-batch.js linxo-importer' > /etc/crontabs/root
+RUN echo '5 7-22 * * * node /usr/src/app/server/scripts/launch-batch.js linxo-importer' > /etc/crontabs/root
 RUN echo '30 0 * * 6 node /usr/src/app/server/scripts/launch-batch.js credit-card-calendar' >> /etc/crontabs/root
 
-WORKDIR /usr/src/app/server
-CMD /usr/sbin/crond -f && BASE_PATH=${BASE_PATH} npm start
+RUN echo '#!/bin/bash' > /usr/src/app/start.sh
+RUN echo '/usr/sbin/crond -f' >> /usr/src/app/start.sh
+RUN echo 'BASE_PATH=$1 npm --prefix /usr/src/app/server prestart' >> /usr/src/app/start.sh
+RUN echo 'BASE_PATH=$1 node /usr/src/app/server/src/index.js' >> /usr/src/app/start.sh
+RUN chmod +x /usr/src/app/start.sh
+
+WORKDIR /usr/src/app
+CMD start.sh ${BASE_PATH}
