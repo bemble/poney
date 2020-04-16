@@ -119,7 +119,7 @@ export default React.memo(() => {
                 isAmount: true,
                 color: "blueGrey",
                 icon: faNotEqual,
-                content: (amounts.real - amounts.inApp)
+                content: Math.abs(amounts.real - amounts.inApp)
             });
         }
 
