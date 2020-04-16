@@ -151,6 +151,6 @@ class LinxoImporter {
             console.log("Download CSV button not found.");
         }
 
-        browser.close();
+        await browser.close();
     }
 }
