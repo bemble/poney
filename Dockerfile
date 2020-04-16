@@ -30,10 +30,6 @@ EXPOSE 3100
 RUN echo '5 7-22 * * * node /usr/src/app/server/scripts/launch-batch.js linxo-importer' > /etc/crontabs/root
 RUN echo '30 0 * * 6 node /usr/src/app/server/scripts/launch-batch.js credit-card-calendar' >> /etc/crontabs/root
 
-RUN echo '#!/bin/bash' > /usr/src/app/start.sh
-RUN echo '/usr/sbin/crond -f' >> /usr/src/app/start.sh
-RUN echo 'BASE_PATH=$1 npm --prefix /usr/src/app/server prestart' >> /usr/src/app/start.sh
-RUN echo 'BASE_PATH=$1 node /usr/src/app/server/src/index.js' >> /usr/src/app/start.sh
-RUN chmod +x /usr/src/app/start.sh
+RUN chmod +x /usr/src/app/poney.sh
 
-CMD /usr/src/app/start.sh ${BASE_PATH}
+CMD /usr/src/app/poney.sh ${BASE_PATH}
