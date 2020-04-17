@@ -11,7 +11,13 @@ import {
     IconButton
 } from "@material-ui/core";
 import {Link} from 'react-router-dom';
-import {Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Assignment as AssignmentIcon} from "@material-ui/icons";
+import {
+    Add as AddIcon,
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    Assignment as AssignmentIcon,
+    FileCopy as FileCopyIcon
+} from "@material-ui/icons";
 import Title from "../../components/Title";
 import Loading from "../../components/Loading";
 import EditDialog from "./EditDialog";
@@ -56,6 +62,11 @@ class Budgets extends React.PureComponent {
         this.load();
     }
 
+    async handleDuplicate(id){
+        await Api.service(`budgets/duplicate/${id}`, {method: "POST"});
+        this.load();
+    }
+
     render() {
         const {isLoading, data, displayDialog, innerLoading, edit} = this.state;
         const {classes} = this.props;
@@ -70,7 +81,7 @@ class Budgets extends React.PureComponent {
                         <TableCell>Libelle</TableCell>
                         <TableCell>Ajout</TableCell>
                         <TableCell>Mise à jour</TableCell>
-                        <TableCell width={44 * 2}/>
+                        <TableCell width={44 * 3}/>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -90,6 +101,9 @@ class Budgets extends React.PureComponent {
                         <TableCell>
                             <IconButton aria-label="Editer" onClick={() => this.setState({edit: line})}>
                                 <EditIcon fontSize="small"/>
+                            </IconButton>
+                            <IconButton aria-label="Dupliquer" onClick={() => this.handleDuplicate(line.id)}>
+                                <FileCopyIcon fontSize="small"/>
                             </IconButton>
                             <IconButton aria-label="Supprimer" onClick={() => this.handleDelete(line.id)}
                                         disabled={!!line.inUse}>

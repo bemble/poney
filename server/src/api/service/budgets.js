@@ -4,6 +4,10 @@ router.post('/set_in_use/:id', async (req, res) => {
     res.json(await Budgets.setInUse(req.params.id));
 });
 
+router.post('/duplicate/:id', async (req, res) => {
+    res.json(await Budgets.duplicate(req.params.id));
+});
+
 router.get('/totals/:id', async (req, res) => {
     res.json(await Budgets.getTotals(req.params.id));
 });
@@ -27,5 +31,30 @@ class Budgets {
                          SUM(CASE WHEN isIncome = ? AND operationKind = ? THEN amount ELSE 0 END) AS transfers
                        FROM budgetLine
                        WHERE idBudget = ?`, [1, 0, 0, "savingTransfer", id])
+    }
+
+    static async duplicate(id) {
+        const db = await Database;
+        const currentTimestamp = Database.currentTimestamp();
+
+        const stmt = await db.run(`INSERT INTO budget (label, inUse, addedAt, updatedAt)
+                                   SELECT label || " copie", ?, ?, ?
+                                   FROM budget
+                                   WHERE id = ?`, [0, currentTimestamp, currentTimestamp, id]);
+        return db.run(`INSERT INTO budgetLine (idBudget, label, amount, isIncome, dayOfMonth, operationKind, categories,
+                                               color, \`order\`, addedAt, updatedAt)
+                       SELECT ?,
+                              label,
+                              amount,
+                              isIncome,
+                              dayOfMonth,
+                              operationKind,
+                              categories,
+                              color,
+                              \`order\`,
+                              ?,
+                              ?
+                       FROM budgetLine
+                       WHERE idBudget = ?`, [stmt.lastID, currentTimestamp, currentTimestamp, id]);
     }
 }
