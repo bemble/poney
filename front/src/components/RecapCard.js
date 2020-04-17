@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center',
         padding: 16,
         color: "#FFF",
-        borderRadius: 4,
+        borderRadius: 2,
         fontSize: 18,
         fontWeight: 700,
         position: "relative",
