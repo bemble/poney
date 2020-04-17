@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {XYPlot, VerticalBarSeries, YAxis, XAxis, Hint, makeWidthFlexible} from 'react-vis';
 import moment from "moment";
-import {formatNumber} from "../../core/Tools";
+import {formatNumber} from "../../../core/Tools";
 import {red, green} from "@material-ui/core/colors";
 import {makeStyles} from "@material-ui/core";
 
@@ -31,7 +31,7 @@ export default function HealthGraph(props) {
 
     useEffect(() => {
         const newData = (props.data || []).map(l => {
-            let color = l.amount > 0 ? green[50] : red[50];
+            let color = l.amount > 0 ? green[100] : red[100];
             if (moment.utc(l.date, 'X').isSame(moment(), 'day')) {
                 color = l.amount > 0 ? green[500] : red[500];
             }
