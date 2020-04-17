@@ -15,36 +15,40 @@ module.exports = async () => {
     const db = await Database;
 
     const {currentStatus} = await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`);
-    if(currentStatus === 2) {
+    if (currentStatus === 2) {
         console.log('A Linxo import task is already in process, aborting.');
         process.exit(0);
     }
 
     console.log('Starting import data from Linxo...');
-    await db.run(`INSERT OR
-                   REPLACE INTO batchHistory
-                     (script, status, message, lastRunnedAt)
-                   VALUES
-                     (?, ?, ?, ?)`, [SCRIPT_NAME, 2, null, Database.currentTimestamp()]);
+    try {
+        await db.run(`INSERT OR
+                      REPLACE INTO batchHistory
+                        (script, status, message, lastRunnedAt)
+                      VALUES
+                        (?, ?, ?, ?)`, [SCRIPT_NAME, 2, null, Database.currentTimestamp()]);
 
-    let hasError = true;
-    let retries = 3;
-    let lastError = null;
-    while (hasError && retries > 0) {
-        try {
-            await LinxoImporter.process();
-            hasError = false;
-        } catch (e) {
-            lastError = e.message;
-            retries--;
+        let hasError = true;
+        let retries = 3;
+        let lastError = null;
+        while (hasError && retries > 0) {
+            try {
+                await LinxoImporter.process();
+                hasError = false;
+            } catch (e) {
+                lastError = e.message;
+                retries--;
+            }
         }
-    }
 
-    await db.run(`INSERT OR
-                   REPLACE INTO batchHistory
-                     (script, status, message, lastRunnedAt)
-                   VALUES
-                     (?, ?, ?, ?)`, [SCRIPT_NAME, hasError ? 1 : 0, hasError ? lastError : null, Database.currentTimestamp()]);
+        await db.run(`INSERT OR
+                      REPLACE INTO batchHistory
+                        (script, status, message, lastRunnedAt)
+                      VALUES
+                        (?, ?, ?, ?)`, [SCRIPT_NAME, hasError ? 1 : 0, hasError ? lastError : null, Database.currentTimestamp()]);
+    } catch (e) {
+        console.error(e.message);
+    }
     console.log('Task finished.');
 };
 
@@ -151,6 +155,6 @@ class LinxoImporter {
             console.log("Download CSV button not found.");
         }
 
-        await browser.close();
+        browser.close();
     }
 }

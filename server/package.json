@@ -1,8 +1,12 @@
 {
   "private": true,
   "scripts": {
-    "prestart": "db-migrate up && node scripts/set-base-path-front.js && node scripts/launch-batch.js credit-card-calendar",
     "start": "node src/index.js",
+    "prestart": "db-migrate up && npm run prestart:scripts",
+    "prestart:scripts": "npm run prestart:setBasePath && npm run prestart:handleCalendar && npm run prestart:handleStickybatchs",
+    "prestart:setBasePath": "node scripts/set-base-path-front.js",
+    "prestart:handleCalendar": "node scripts/launch-batch.js credit-card-calendar",
+    "prestart:handleStickybatchs": "node scripts/launch-batch.js reset-batchs-status",
     "prestart:dev": "db-migrate up",
     "start:dev": "APP_ENVIRONMENT=dev nodemon src/index.js"
   },
