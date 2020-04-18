@@ -71,7 +71,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 export default React.memo(() => {
-    const [isInnerLoading, setIsInnerLoading] = useState(true);
     const [amounts, setAmounts] = useState();
     const [showAddAmount, setShowAddAmount] = useState(useLocation().pathname.indexOf("/ajout-montant") >= 0);
     const [startDate, setStartDate] = useState(moment());
@@ -83,8 +82,6 @@ export default React.memo(() => {
     const updateSavingTotals = async () => {
         const amounts = await Api.service(`savings/totals`);
         setAmounts(amounts);
-
-        setIsInnerLoading(false);
     };
 
     useEffect(() => {
@@ -152,7 +149,6 @@ export default React.memo(() => {
     const isXsScreen = useMediaQuery(theme.breakpoints.only("xs"));
 
     return <div>
-        <Title displayLoading={isInnerLoading}>Comptes épargne</Title>
         {data.length ? <Header data={data}/> : null}
         <MuiPickersUtilsProvider utils={MomentUtils} moment={moment} locale={"fr"}>
             <Grid container spacing={1} style={{padding: "0 16px"}}>

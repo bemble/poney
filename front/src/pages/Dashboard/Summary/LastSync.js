@@ -1,10 +1,10 @@
 import React from "react";
 import * as MaterialColors from "@material-ui/core/colors";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {grey, red} from "@material-ui/core/colors";
 import moment from "moment";
 import {faCircleNotch, faRocket} from "@fortawesome/free-solid-svg-icons";
 import {makeStyles} from "@material-ui/core/styles";
+import {Paper} from "@material-ui/core";
 
 const colors = {};
 Object.entries(MaterialColors).forEach(([name, color]) => {
@@ -18,19 +18,15 @@ Object.entries(MaterialColors).forEach(([name, color]) => {
 
 const useStyles = makeStyles(theme => ({
     root: {
-        background: grey[200],
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        width: "100%",
         padding: 4,
-        color: grey[500],
-        borderRadius: 2,
+        color: theme.palette.text.hint,
         fontSize: 12,
+        lineHeight: "12px",
         fontWeight: 700,
         position: "relative",
-        boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.3)",
-        boxSizing: "border-box"
     },
     content: {
         position: "relative",
@@ -46,8 +42,8 @@ const useStyles = makeStyles(theme => ({
         }
     },
     synchAlert: {
-        border: `1px solid ${red[400]}`,
-        color: red[800],
+        border: `1px solid ${theme.palette.error.main}`,
+        color: theme.palette.error.main,
         borderLeftWidth: 3,
         fontSize: 8,
         fontFamily: "monospace",
@@ -68,14 +64,14 @@ export default React.memo((props) => {
         : (props.data ? "Dernière synchronisation " + moment(props.data.lastRunnedAt, 'X').fromNow() : "En attente d'information.");
 
     return <div>
-        <div className={classes.root}>
+        <Paper className={classes.root}>
             <span className={classes.content}>{content}</span>
             <div className={classes.action + " " + (isImporting ? classes.hover : "")}
                  title={message}
                  onClick={() => props.onClick && props.onClick()}>
                 <FontAwesomeIcon icon={isImporting ? faCircleNotch : faRocket} spin={isImporting}/>
             </div>
-        </div>
+        </Paper>
         {props.data && props.data.message ? <div className={classes.synchAlert}>{props.data.message}</div> : null}
     </div>;
 });

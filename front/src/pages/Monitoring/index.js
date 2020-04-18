@@ -14,31 +14,39 @@ import {
     Toolbar,
     Typography
 } from "@material-ui/core";
-import Title from "../../components/Title";
 import Loading from "../../components/Loading";
 import {grey, green, indigo, blue, amber} from "@material-ui/core/colors";
 import moment from 'moment';
 import {Search as SearchIcon, Close as CloseIcon} from "@material-ui/icons";
 import Api from "../../core/Api";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCreditCard, faLongArrowAltDown, faLongArrowAltUp} from "@fortawesome/free-solid-svg-icons";
 
 const styles = theme => ({
     tools: {
         width: 44,
-        "& button": {
-            color: grey[300]
-        }
+        padding: "6px 10px 6px 10px"
     },
     date: {
         width: 77
     },
+    row: {
+        "& > *": {
+            background: theme.palette.background.default,
+            color: theme.palette.text.hint
+        }
+    },
     today: {
         "& > *": {
-            background: grey[700],
-            color: grey[100]
+            background: theme.palette.background.paper,
+            color: theme.palette.text.primary
         },
         "& > .amount": {
-            background: green[700],
-            color: "#FFF"
+            background: theme.palette.success.dark,
+            color: theme.palette.primary.contrastText
+        },
+        "& > .amount.warning": {
+            background: theme.palette.warning.dark
         }
     },
     dialog: {
@@ -62,6 +70,25 @@ const styles = theme => ({
     },
     deferredDebitCreditCard: {
         color: blue[500]
+    },
+    details: {
+        fontSize: 10,
+        "& span": {
+            color: "#FFF",
+            display: "inline-block",
+            padding: "2px 6px",
+            margin: "0 2px",
+            borderRadius: 12
+        }
+    },
+    detailsIn: {
+        background: green[500]
+    },
+    detailsOut: {
+        background: amber[500]
+    },
+    detailsDeferredDebitCreditCard: {
+        background: blue[500]
     }
 });
 
@@ -71,8 +98,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 class Suivi extends React.PureComponent {
     state = {isLoading: true, data: [], hasDefferedCreditCard: false, details: null};
-    socketHandlerRef = null;
-    socketDetailsHandlerRef = null;
 
     UNSAFE_componentWillMount() {
         const start = moment.utc();
@@ -90,7 +115,7 @@ class Suivi extends React.PureComponent {
         (async () => {
             this.setState({isLoading: true});
             const {start, end} = this.state;
-            const data = await Api.service(`monitoring`,null, {start: start.unix(), end: end.unix()});
+            const data = await Api.service(`monitoring`, null, {start: start.unix(), end: end.unix()});
             const {lines, hasDeferredCreditCard} = data;
             this.setState({data: lines, hasDeferredCreditCard, isLoading: false});
             setTimeout(() => {
@@ -118,35 +143,42 @@ class Suivi extends React.PureComponent {
         };
 
         return <div>
-            <Title>Suivi</Title>
             {isLoading ? <Loading/> : null}
             {!isLoading && data ? <Table stickyHeader size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell className={classes.tools}/>
                         <TableCell className={classes.date}>Date</TableCell>
                         <TableCell align="right">Compte courant</TableCell>
-                        <TableCell align="right">Crédits</TableCell>
-                        <TableCell align="right">Débits</TableCell>
-                        {hasDeferredCreditCard ? <TableCell align="right">Débit diff.</TableCell> : null}
+                        <TableCell className={classes.tools}/>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {data.map((line, i) => <TableRow hover key={line.date}
-                                                id={formatDate(line.date) === yesterday ? "yesterday" : ""}
-                                                className={moment.utc(line.date, 'X').isSame(today, "day") ? classes.today : ""}>
-                        <TableCell className={classes.tools}>
-                            {(line.credits || line.debits || (i > 0 && line.deferredCreditCard !== data[i-1].deferredCreditCard)) ? <IconButton fontSize="small" aria-label="Détails"
-                                                                         onClick={() => displayDetails(line.date)} style={{padding: 1}}>
-                                <SearchIcon fontSize="inherit"/>
-                            </IconButton> : null}
-                        </TableCell>
+                                                     id={formatDate(line.date) === yesterday ? "yesterday" : ""}
+                                                     className={moment.utc(line.date, 'X').isSame(today, "day") ? classes.today : classes.row}>
                         <TableCell className={classes.date}>{formatDate(line.date)}</TableCell>
-                        <TableCell className="amount" align="right">{formatNumber(line.amount)}</TableCell>
-                        <TableCell align="right">{formatNumber(line.credits)}</TableCell>
-                        <TableCell align="right">{formatNumber(line.debits)}</TableCell>
-                        {hasDeferredCreditCard ?
-                            <TableCell align="right">{formatNumber(line.deferredCreditCard)}</TableCell> : false}
+                        <TableCell className={"amount " + (line.amount <= 150 ? "warning" : "")} align="right">
+                            {formatNumber(line.amount)}<br/>
+                            <span className={classes.details}>
+                                {line.credits ? <span className={classes.detailsIn}>
+                                    <FontAwesomeIcon icon={faLongArrowAltDown}/> {formatNumber(line.credits)}
+                                </span> : null}
+                                {line.debits ? <span className={classes.detailsOut}>
+                                    <FontAwesomeIcon icon={faLongArrowAltUp}/> {formatNumber(line.debits)}
+                                </span> : null}
+                                {hasDeferredCreditCard ?
+                                    <span className={classes.detailsDeferredDebitCreditCard}>
+                                    <FontAwesomeIcon icon={faCreditCard}/> {formatNumber(line.deferredDebitCreditCard)}
+                                </span> : null}
+                            </span>
+                        </TableCell>
+                        <TableCell className={classes.tools}>
+                            {(line.credits || line.debits || (i > 0 && line.deferredDebitCreditCard !== data[i - 1].deferredDebitCreditCard)) ?
+                                <IconButton fontSize="small" aria-label="Détails"
+                                            onClick={() => displayDetails(line.date)} style={{padding: 1}}>
+                                    <SearchIcon fontSize="inherit"/>
+                                </IconButton> : null}
+                        </TableCell>
                     </TableRow>)}
                 </TableBody>
             </Table> : null}
@@ -165,29 +197,23 @@ class Suivi extends React.PureComponent {
                     <TableHead>
                         <TableRow>
                             <TableCell>Libelle</TableCell>
-                            <TableCell align="right">Crédit</TableCell>
-                            <TableCell align="right">Débit</TableCell>
-                            <TableCell align="right">Carte de crédit</TableCell>
+                            <TableCell align="right">Montant</TableCell>
                         </TableRow>
                     </TableHead>
                     {details ? <TableBody>
                         {details.credits.map((line, i) => <TableRow hover key={`credit-${i}`}>
                             <TableCell className={classes.credit}>{line.label}</TableCell>
                             <TableCell className={classes.credit} align="right">{formatNumber(line.amount)}</TableCell>
-                            <TableCell/>
-                            <TableCell/>
                         </TableRow>)}
                         {details.debits.map((line, i) => <TableRow hover key={`debit-${i}`}>
                             <TableCell className={classes.debit}>{line.label}</TableCell>
-                            <TableCell/>
                             <TableCell className={classes.debit} align="right">{formatNumber(line.amount)}</TableCell>
-                            <TableCell/>
                         </TableRow>)}
-                        {details.deferredDebitCreditCard.map((line, i) => <TableRow hover key={`deferredDebitCreditCard-${i}`}>
+                        {details.deferredDebitCreditCard.map((line, i) => <TableRow hover
+                                                                                    key={`deferredDebitCreditCard-${i}`}>
                             <TableCell className={classes.deferredDebitCreditCard}>{line.label}</TableCell>
-                            <TableCell/>
-                            <TableCell/>
-                            <TableCell className={classes.deferredDebitCreditCard} align="right">{formatNumber(line.amount)}</TableCell>
+                            <TableCell className={classes.deferredDebitCreditCard}
+                                       align="right">{formatNumber(line.amount)}</TableCell>
                         </TableRow>)}
                     </TableBody> : null}
                 </Table>

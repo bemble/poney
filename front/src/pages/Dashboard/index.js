@@ -4,9 +4,9 @@ import Api from "../../core/Api";
 import LastSync from "./Summary/LastSync";
 import Balance from "./Summary/Balance";
 import {faMoneyCheckAlt, faPiggyBank} from "@fortawesome/free-solid-svg-icons";
+import {useHistory} from "react-router-dom";
 
 import AccountWeather from "./AccountWeather";
-import Title from "../../components/Title";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -25,6 +25,7 @@ export default React.memo((props) => {
     const [lastSynch, setLastSynch] = useState();
     const [balance, setBalance] = useState(-1);
     const [savingsTotal, setSavingsTotal] = useState(-1);
+    const history = useHistory();
 
     const updateSynch = async () => {
         const data = await Api.get(`batch_history`, `linxo-importer`, {field: 'script'});
@@ -60,19 +61,22 @@ export default React.memo((props) => {
     const theme = useTheme();
     const isXsScreen = useMediaQuery(theme.breakpoints.down('xs'));
     return <div>
-        <Title>Dashboard</Title>
         <Grid container spacing={1} className={classes.root} alignItems="center">
             <Grid item xs={12}>
                 <LastSync data={lastSynch} onClick={() => onImportClick()}/>
             </Grid>
-            <Grid item xs={isXsScreen ? 12 : false}>
-                <Balance data={balance} title={"Compte courant"} icon={faMoneyCheckAlt} warning={150} colors={["teal", "deepOrange"]}/>
+            <Grid item xs={isXsScreen ? 6 : false}>
+                <Balance data={balance} title={"Compte courant"} icon={faMoneyCheckAlt} warning={150}
+                         colors={["teal", "deepOrange"]}
+                         onClick={() => history.push("/suivi")}/>
+            </Grid>
+            <Grid item xs={isXsScreen ? 6 : false}>
+                <Balance data={savingsTotal} title={"Épargne"} icon={faPiggyBank} warning={1500}
+                         colors={["indigo", "orange"]}
+                         onClick={() => history.push("/comptes-epargne")}/>
             </Grid>
             <Grid item xs={12}>
                 <AccountWeather lastSynchUpdate={lastSynch && lastSynch.runnedAt || 0}/>
-            </Grid>
-            <Grid item xs={isXsScreen ? 12 : false}>
-                <Balance data={savingsTotal} title={"Épargne"} icon={faPiggyBank} warning={1500} colors={["indigo", "orange"]}/>
             </Grid>
         </Grid>
     </div>;

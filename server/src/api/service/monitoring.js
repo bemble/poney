@@ -86,7 +86,7 @@ class Monitoring {
                 if (line.isIncome) {
                     data.credits.push(line);
                 } else if (hasDeferredCreditCard && line.operationKind === "creditCard") {
-                    data.deferredCreditCard.push(line);
+                    data.deferredDebitCreditCard.push(line);
                 } else {
                     data.debits.push(line);
                 }
@@ -123,12 +123,12 @@ class Monitoring {
                 date: curMoment.unix(),
                 credits: 0,
                 debits: 0,
-                deferredCreditCard: 0,
+                deferredDebitCreditCard: 0,
                 amount: lastAmount
             };
 
             if (deferredCreditCard[formattedDate]) {
-                data.deferredCreditCard = deferredCreditCard[formattedDate];
+                data.deferredDebitCreditCard = deferredCreditCard[formattedDate];
             }
 
             if (linesByDay[formattedDate]) {

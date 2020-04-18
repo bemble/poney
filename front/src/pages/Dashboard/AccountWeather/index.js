@@ -6,7 +6,7 @@ import {
 import MomentUtils from '@date-io/moment';
 import HealthGraph from "./HealthGraph";
 import "moment/locale/fr";
-import {Grid} from "@material-ui/core";
+import {Grid, Paper} from "@material-ui/core";
 import Api from "../../../core/Api";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloudSun} from "@fortawesome/free-solid-svg-icons";
@@ -15,6 +15,14 @@ import {makeStyles} from "@material-ui/core/styles";
 import {grey} from "@material-ui/core/colors";
 
 const useStyles = makeStyles(theme => ({
+    root: {
+        boxSizing: "border-box",
+        width: "100%",
+        textAlign: 'center',
+        fontSize: 18,
+        fontWeight: 700,
+        padding: 4
+    },
     title: {
         fontSize: 12,
         display: "flex",
@@ -22,19 +30,6 @@ const useStyles = makeStyles(theme => ({
     },
     icon: {
         marginRight: 4,
-    },
-    content: {
-        boxSizing: "border-box",
-        background: grey[50],
-        width: "100%",
-        textAlign: 'center',
-        color: grey[500],
-        borderRadius: 2,
-        fontSize: 18,
-        fontWeight: 700,
-        position: "relative",
-        boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.3)",
-        padding: 4
     }
 }));
 
@@ -66,8 +61,7 @@ export default React.memo((props) => {
 
     const classes = useStyles();
 
-    return <div className={classes.root}>
-        <div className={classes.content}>
+    return <Paper className={classes.root}>
         <span className={classes.title}>
             <FontAwesomeIcon icon={faCloudSun} className={classes.icon}/>
             <span>Météo du compte courant</span>
@@ -103,6 +97,5 @@ export default React.memo((props) => {
                 </Grid>
             </MuiPickersUtilsProvider>
             <HealthGraph data={lines}/>
-        </div>
-    </div>
+    </Paper>
 });

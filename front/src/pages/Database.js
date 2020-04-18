@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {formatNumber, formatDate} from "../core/Tools";
 import {Table, TableHead, TableBody, TableRow, TableCell, Tooltip} from "@material-ui/core";
-import Title from "../components/Title";
 import Loading from "../components/Loading";
 import Api from "../core/Api";
 
@@ -34,7 +33,6 @@ export default React.memo(() => {
     }, []);
 
     return <div>
-        <Title>Base de données</Title>
         {isLoading ? <Loading/> : null}
         {!isLoading && data ? <Table size="small">
             <TableHead>
