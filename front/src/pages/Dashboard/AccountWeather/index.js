@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default React.memo(() => {
+export default React.memo((props) => {
     const [lines, setLines] = useState([]);
     const [startDate, setStartDate] = useState(moment());
     const [endDate, setEndDate] = useState(moment());
@@ -71,7 +71,7 @@ export default React.memo(() => {
             const {lines} = await Api.service(`monitoring`, null, {start: startDate.unix(), end: endDate.unix()});
             setLines(lines);
         })();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, props.lastSynchUpdate]);
 
     const classes = useStyles();
 

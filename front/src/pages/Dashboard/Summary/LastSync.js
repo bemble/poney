@@ -63,12 +63,13 @@ export default React.memo((props) => {
 
     const isImporting = props.data && props.data.status === 2;
     const message = isImporting ? "Importation en cours" : "Lancer l'importation des données";
+    const content = isImporting
+        ? "Synchronisation avec Linxo en cours..."
+        : (props.data ? "Dernière synchronisation " + moment(props.data.lastRunnedAt, 'X').fromNow() : "En attente d'information.");
 
     return <div>
         <div className={classes.root}>
-            <span className={classes.content}>
-                {props.data ? "Dernière synchronisation " + moment(props.data.lastRunnedAt, 'X').fromNow() : "..."}
-            </span>
+            <span className={classes.content}>{content}</span>
             <div className={classes.action + " " + (isImporting ? classes.hover : "")}
                  title={message}
                  onClick={() => props.onClick && props.onClick()}>

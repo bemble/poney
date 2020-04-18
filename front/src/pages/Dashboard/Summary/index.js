@@ -16,27 +16,37 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default React.memo(() => {
+let synchStatus = 0;
+export default React.memo((props) => {
     const [lastSynch, setLastSynch] = useState();
     const [amount, setAmount] = useState(0);
 
+    const updateSynch = async () => {
+        const data = await Api.get(`batch_history`, `linxo-importer`, {field: 'script'});
+        if (synchStatus === 2 && data.status !== synchStatus) {
+            await Api.service(`/monitoring/totals`).then(({amount}) => setAmount(amount));
+            props.onDataImported && props.onDataImported(data);
+        }
+        synchStatus = data.status;
+        setLastSynch(data);
+    };
+
     useEffect(() => {
         (async () => {
-            Api.get(`batch_history`, `linxo-importer`, {field: 'script'}).then(data => setLastSynch(data));
+            updateSynch();
             Api.service(`/monitoring/totals`).then(({amount}) => setAmount(amount));
+
+            const importerInterval = setInterval(() => {
+                updateSynch();
+            }, 5 * 1000);
+            return () => clearInterval(importerInterval);
         })();
     }, []);
 
     const onImportClick = async () => {
         setLastSynch({...lastSynch, status: 2});
         await Api.service('batchs/linxo-importer');
-        setInterval(() => {
-            Api.get(`batch_history`, `linxo-importer`, {field: 'script'}).then(data => {
-                if (data.status !== 2) {
-                    window.location.reload();
-                }
-            });
-        }, 15 * 1000);
+        synchStatus = 2;
     };
 
     const classes = useStyles();
@@ -46,10 +56,10 @@ export default React.memo(() => {
     return <div>
         <Grid container spacing={1} className={classes.root} alignItems="center">
             <Grid item xs={12}>
-                <LastSync data={lastSynch} onClick={() => onImportClick()} />
+                <LastSync data={lastSynch} onClick={() => onImportClick()}/>
             </Grid>
             <Grid item xs={isXsScreen ? 12 : false}>
-                <Balance data={amount} warning={150} />
+                <Balance data={amount} warning={150}/>
             </Grid>
         </Grid>
     </div>;
