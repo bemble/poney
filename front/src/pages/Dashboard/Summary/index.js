@@ -3,6 +3,7 @@ import {Grid, makeStyles, useMediaQuery, useTheme} from "@material-ui/core";
 import Api from "../../../core/Api";
 import LastSync from "./LastSync";
 import Balance from "./Balance";
+import {faMoneyCheckAlt, faPiggyBank} from "@fortawesome/free-solid-svg-icons";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -19,12 +20,14 @@ const useStyles = makeStyles(theme => ({
 let synchStatus = 0;
 export default React.memo((props) => {
     const [lastSynch, setLastSynch] = useState();
-    const [amount, setAmount] = useState(0);
+    const [balance, setBalance] = useState(-1);
+    const [savingsTotal, setSavingsTotal] = useState(-1);
 
     const updateSynch = async () => {
         const data = await Api.get(`batch_history`, `linxo-importer`, {field: 'script'});
         if (synchStatus === 2 && data.status !== synchStatus) {
-            await Api.service(`/monitoring/totals`).then(({amount}) => setAmount(amount));
+            await Api.service(`/monitoring/totals`).then(({amount}) => setBalance(amount));
+            await Api.service(`/savings/totals`).then(({amount}) => setSavingsTotal(amount));
             props.onDataImported && props.onDataImported(data);
         }
         synchStatus = data.status;
@@ -34,7 +37,8 @@ export default React.memo((props) => {
     useEffect(() => {
         (async () => {
             updateSynch();
-            Api.service(`/monitoring/totals`).then(({amount}) => setAmount(amount));
+            Api.service(`/monitoring/totals`).then(({amount}) => setBalance(amount));
+            Api.service(`/savings/totals`).then(({real}) => setSavingsTotal(real));
 
             const importerInterval = setInterval(() => {
                 updateSynch();
@@ -59,7 +63,10 @@ export default React.memo((props) => {
                 <LastSync data={lastSynch} onClick={() => onImportClick()}/>
             </Grid>
             <Grid item xs={isXsScreen ? 12 : false}>
-                <Balance data={amount} warning={150}/>
+                <Balance data={balance} title={"Compte courant"} icon={faMoneyCheckAlt} warning={150}/>
+            </Grid>
+            <Grid item xs={isXsScreen ? 12 : false}>
+                <Balance data={savingsTotal} title={"Épargne"} icon={faPiggyBank} warning={1500}/>
             </Grid>
         </Grid>
     </div>;

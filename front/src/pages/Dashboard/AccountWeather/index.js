@@ -15,15 +15,6 @@ import {makeStyles} from "@material-ui/core/styles";
 import {grey} from "@material-ui/core/colors";
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        paddingLeft: theme.spacing(),
-        paddingRight: theme.spacing(),
-        paddingTop: theme.spacing(0.5),
-        paddingBottom: theme.spacing(0.5),
-        [theme.breakpoints.down("xs")]: {
-            paddingTop: theme.spacing()
-        }
-    },
     title: {
         fontSize: 12,
         display: "flex",
