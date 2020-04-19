@@ -37,7 +37,7 @@ export default function HealthGraph(props) {
     const theme = useTheme();
     useEffect(() => {
         const newData = (props.data || []).map(l => {
-            const colorType = l.amount > 150 ? "success" : (l.amount > 0 ? "warning" : "error");
+            const colorType = l.amount > props.warning ? "success" : (l.amount > 0 ? "warning" : "error");
             let color = theme.palette.type === "dark" ? theme.palette[colorType].dark : theme.palette[colorType].light;
             let opacity = 0.4;
             if (moment.utc(l.date, 'X').isSame(moment(), 'day')) {

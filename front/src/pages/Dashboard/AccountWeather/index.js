@@ -99,6 +99,6 @@ export default React.memo((props) => {
                     </Grid>
                 </Grid>
             </MuiPickersUtilsProvider>
-            <HealthGraph data={lines}/>
+            <HealthGraph data={lines} warning={props.warning}/>
     </Paper>
 });

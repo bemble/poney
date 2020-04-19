@@ -25,6 +25,8 @@ export default React.memo((props) => {
     const [lastSynch, setLastSynch] = useState();
     const [balance, setBalance] = useState(-1);
     const [savingsTotal, setSavingsTotal] = useState(-1);
+    const [warning, setWarning] = useState(0);
+    const [warningSavings, setWarningSavings] = useState(0);
     const history = useHistory();
 
     const updateSynch = async () => {
@@ -39,6 +41,8 @@ export default React.memo((props) => {
 
     useEffect(() => {
         (async () => {
+            setWarning(parseInt((await Api.get("configuration", "WARNING_AMOUNT")).value));
+            setWarningSavings(parseInt((await Api.get("configuration", "WARNING_AMOUNT_SAVINGS")).value));
             updateSynch();
             Api.service(`/monitoring/totals`).then(({amount}) => setBalance(amount));
             Api.service(`/savings/totals`).then(({real}) => setSavingsTotal(real));
@@ -60,23 +64,24 @@ export default React.memo((props) => {
 
     const theme = useTheme();
     const isXsScreen = useMediaQuery(theme.breakpoints.down('xs'));
+
     return <div>
         <Grid container spacing={2} className={classes.root} alignItems="center">
             <Grid item xs={12}>
                 <LastSync data={lastSynch} onClick={() => onImportClick()}/>
             </Grid>
             <Grid item xs={isXsScreen ? 6 : false}>
-                <Balance data={balance} title={"Compte courant"} icon={faMoneyCheckAlt} warning={150}
+                <Balance data={balance} title={"Compte courant"} icon={faMoneyCheckAlt} warning={warning}
                          colors={["teal", "deepOrange"]}
                          onClick={() => history.push("/suivi")}/>
             </Grid>
             <Grid item xs={isXsScreen ? 6 : false}>
-                <Balance data={savingsTotal} title={"Épargne"} icon={faPiggyBank} warning={1500}
+                <Balance data={savingsTotal} title={"Épargne"} icon={faPiggyBank} warning={warningSavings}
                          colors={["indigo", "orange"]}
                          onClick={() => history.push("/comptes-epargne")}/>
             </Grid>
             <Grid item xs={12}>
-                <AccountWeather lastSynchUpdate={lastSynch && lastSynch.runnedAt || 0}/>
+                <AccountWeather lastSynchUpdate={lastSynch && lastSynch.runnedAt || 0} warning={warning}/>
             </Grid>
         </Grid>
     </div>;
