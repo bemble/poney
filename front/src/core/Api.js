@@ -22,6 +22,10 @@ class Api {
             return Api.add(model, values, queryParams);
         }
         return Api.get(model, id).then(dbModel => {
+            if (model === "configuration" && (!dbModel || dbModel.isDefaultValue)) {
+                values.id = id;
+                dbModel = null;
+            }
             return dbModel ? Api.update(model, id, values, queryParams) : Api.add(model, values, queryParams);
         });
     }

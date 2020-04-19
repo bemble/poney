@@ -9,15 +9,16 @@ const useStyle = makeStyles(theme => ({
         padding: theme.spacing(12)
     },
     title: {
-        fontSize: 36
+        fontSize: 36,
+        color: theme.palette.text.primary
     }
 }));
 
 export default function Loading() {
-        const classes = useStyle();
+    const classes = useStyle();
 
-        return <div className={classes.root}>
-            <CircularProgress className={classes.loader}/>
-            <Typography variant="h1" component="h1" className={classes.title}>Chargement...</Typography>
-        </div>
+    return <div className={classes.root}>
+        <CircularProgress className={classes.loader}/>
+        <Typography variant="h1" component="h1" className={classes.title}>Chargement...</Typography>
+    </div>
 }

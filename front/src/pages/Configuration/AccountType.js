@@ -44,6 +44,7 @@ export default function AccountType(props) {
 
         setType(value);
         stopLoad();
+        props.onChange && props.onChange();
     };
 
     return <Select value={type} onChange={handleChange}>

@@ -12,7 +12,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloudSun} from "@fortawesome/free-solid-svg-icons";
 
 import {makeStyles} from "@material-ui/core/styles";
-import {grey} from "@material-ui/core/colors";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -26,7 +25,9 @@ const useStyles = makeStyles(theme => ({
     title: {
         fontSize: 12,
         display: "flex",
-        alignItems: "center"
+        alignItems: "center",
+        fontWeight: 400,
+        color: theme.palette.text.secondary
     },
     icon: {
         marginRight: 4,
@@ -36,8 +37,8 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
     const [lines, setLines] = useState([]);
-    const [startDate, setStartDate] = useState(moment());
-    const [endDate, setEndDate] = useState(moment());
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
     useEffect(() => {
         const start = moment.utc();
@@ -54,8 +55,10 @@ export default React.memo((props) => {
 
     useEffect(() => {
         (async () => {
-            const {lines} = await Api.service(`monitoring`, null, {start: startDate.unix(), end: endDate.unix()});
-            setLines(lines);
+            if(startDate && endDate) {
+                const {lines} = await Api.service(`monitoring`, null, {start: startDate.unix(), end: endDate.unix()});
+                setLines(lines);
+            }
         })();
     }, [startDate, endDate, props.lastSynchUpdate]);
 

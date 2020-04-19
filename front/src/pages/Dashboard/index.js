@@ -61,7 +61,7 @@ export default React.memo((props) => {
     const theme = useTheme();
     const isXsScreen = useMediaQuery(theme.breakpoints.down('xs'));
     return <div>
-        <Grid container spacing={1} className={classes.root} alignItems="center">
+        <Grid container spacing={2} className={classes.root} alignItems="center">
             <Grid item xs={12}>
                 <LastSync data={lastSynch} onClick={() => onImportClick()}/>
             </Grid>

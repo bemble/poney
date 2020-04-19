@@ -13,7 +13,8 @@ const useStyles = makeStyles(theme => ({
         fontSize: 36,
         borderBottomWidth: 2,
         borderStyle: "solid",
-        borderImage: `linear-gradient(to right, ${pink[700]}, ${red[700]}, rgba(0,0,0,0)) 0 1 100%`
+        borderImage: `linear-gradient(to right, ${pink[700]}, ${red[700]}, rgba(0,0,0,0)) 0 1 100%`,
+        color: theme.palette.text.primary
     },
     loader: {
         position: "absolute",

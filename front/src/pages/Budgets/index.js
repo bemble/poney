@@ -12,22 +12,43 @@ import {
 } from "@material-ui/core";
 import {Link} from 'react-router-dom';
 import {
-    Add as AddIcon,
-    Delete as DeleteIcon,
-    Edit as EditIcon,
-    Assignment as AssignmentIcon,
-    FileCopy as FileCopyIcon
+    Add as AddIcon
 } from "@material-ui/icons";
-import Title from "../../components/Title";
+import TopRightLoading from "../../components/TopRightLoading";
 import Loading from "../../components/Loading";
 import EditDialog from "./EditDialog";
 import Api from "../../core/Api";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCopy, faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
 
 const styles = theme => ({
+    root: {
+        marginBottom: 84,
+        "& td": {
+            padding: "8px !important"
+        }
+    },
+    inUse: {paddingRight: 0},
     fab: {
         position: 'fixed',
         bottom: theme.spacing(2),
         right: theme.spacing(2),
+    },
+    link: {
+        color: theme.palette.text.primary,
+        textDecoration: "none"
+    },
+    date: {
+        color: theme.palette.text.hint,
+        fontSize: 11
+    },
+    tools: {
+        width: "92px !important",
+        minWidth: "92px !important"
+    },
+    tool: {
+        fontSize: 16,
+        padding: 5
     }
 });
 
@@ -62,7 +83,7 @@ class Budgets extends React.PureComponent {
         this.load();
     }
 
-    async handleDuplicate(id){
+    async handleDuplicate(id) {
         await Api.service(`budgets/duplicate/${id}`, {method: "POST"});
         this.load();
     }
@@ -71,44 +92,40 @@ class Budgets extends React.PureComponent {
         const {isLoading, data, displayDialog, innerLoading, edit} = this.state;
         const {classes} = this.props;
         return <div>
-            <Title displayLoading={innerLoading}>Budgets</Title>
+            <TopRightLoading visible={innerLoading}/>
             {isLoading ? <Loading/> : null}
-            {!isLoading && data ? <Table>
+            {!isLoading && data ? <Table className={classes.root}>
                 <TableHead>
                     <TableRow>
-                        <TableCell width={44 * 1}/>
-                        <TableCell>Courant</TableCell>
-                        <TableCell>Libelle</TableCell>
-                        <TableCell>Ajout</TableCell>
-                        <TableCell>Mise à jour</TableCell>
-                        <TableCell width={44 * 3}/>
+                        <TableCell className={classes.inUse}>Courant</TableCell>
+                        <TableCell/>
+                        <TableCell className={classes.tools}/>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {data.map(line => <TableRow key={line.id}>
-                        <TableCell>
-                            <Link to={`/budgets/${line.id}`}>
-                                <IconButton aria-label="Gérer">
-                                    <AssignmentIcon fontSize="small"/>
-                                </IconButton>
-                            </Link>
-                        </TableCell>
                         <TableCell><Checkbox checked={!!line.inUse}
                                              onChange={() => this.handleChangeUse(line.id)}/></TableCell>
-                        <TableCell>{line.label}</TableCell>
-                        <TableCell>{(new Date(line.addedAt * 1000).toLocaleString())}</TableCell>
-                        <TableCell>{(new Date(line.updatedAt * 1000).toLocaleString())}</TableCell>
                         <TableCell>
-                            <IconButton aria-label="Editer" onClick={() => this.setState({edit: line})}>
-                                <EditIcon fontSize="small"/>
+                            <Link to={`/budgets/${line.id}`} className={classes.link}>
+                                {line.label}<br/>
+                                <span className={classes.date}>{(new Date(line.addedAt * 1000).toLocaleString())}</span>
+                            </Link>
+                        </TableCell>
+                        <TableCell className={classes.tools}>
+                            <IconButton aria-label="Editer" onClick={() => this.setState({edit: line})}
+                                        className={classes.tool}>
+                                <FontAwesomeIcon icon={faEdit}/>
                             </IconButton>
-                            <IconButton aria-label="Dupliquer" onClick={() => this.handleDuplicate(line.id)}>
-                                <FileCopyIcon fontSize="small"/>
+                            <IconButton aria-label="Dupliquer" onClick={() => this.handleDuplicate(line.id)}
+                                        className={classes.tool}>
+                                <FontAwesomeIcon icon={faCopy}/>
                             </IconButton>
                             <IconButton aria-label="Supprimer" onClick={() => this.handleDelete(line.id)}
-                                        disabled={!!line.inUse}>
-                                <DeleteIcon fontSize="small"/>
+                                        className={classes.tool}>
+                                <FontAwesomeIcon icon={faTrash}/>
                             </IconButton>
+
                         </TableCell>
                     </TableRow>)}
                 </TableBody>

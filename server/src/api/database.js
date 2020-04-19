@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const {Model} = require('../core');
+const {Model, Configuration} = require('../core');
 const _ = require('lodash');
 
 // List
@@ -20,17 +20,21 @@ router.get('/:tableName', async (req, res) => {
 router.get('/:tableName/:id', async (req, res) => {
     let field = (req.query.field ? req.query.field : false) || "id";
 
+    const id = req.params.id;
     const jsonQuery = {
         $from: _.chain(req.params.tableName).camelCase().value(),
         $where: {
-            [field]: req.params.id
+            [field]: id
         }
     };
 
     try {
         const model = await Model.getOne(jsonQuery);
         if (!model) {
-            return res.status(404).json(null);
+            if (req.params.tableName !== "configuration" || Configuration.defaultValue[id] === undefined) {
+                return res.status(404).json(null);
+            }
+            return res.json({id, value: Configuration.defaultValue[id], isDefaultValue: true})
         }
         return res.json(model);
     } catch (e) {

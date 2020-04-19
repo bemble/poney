@@ -26,13 +26,12 @@ const useStyles = makeStyles(theme => ({
     },
     hidden: {
         "& *": {
-            color: grey[400]
+            color: theme.palette.text.hint
         }
     },
     tools: {
-        [theme.breakpoints.up("xs")]: {
-            minWidth: "76px !important"
-        }
+        width: "92px !important",
+        minWidth: "92px !important"
     },
     tool: {
         fontSize: 16,
@@ -43,7 +42,7 @@ const useStyles = makeStyles(theme => ({
         fontSize: 13,
         color: blueGrey[400],
         "& span:first-child": {
-            color: indigo[500]
+            color: theme.palette.info.main
         }
     },
     endAt: {
@@ -60,8 +59,6 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo((props) => {
     const classes = useStyles();
-    const theme = useTheme();
-    const isXsScreen = useMediaQuery(theme.breakpoints.down("xs"));
     const history = useHistory();
 
     const handleDisplayRecap = async (projectId) => {
@@ -69,29 +66,19 @@ export default React.memo((props) => {
     };
 
     return <Table className={classes.root}>
-        <TableHead>
-            <TableRow>
-                <TableCell>Libelle</TableCell>
-                {!isXsScreen ? <TableCell>Payé</TableCell> : null}
-                {!isXsScreen ? <TableCell>Budgetisé</TableCell> : null}
-                <TableCell width={44 * 2}/>
-            </TableRow>
-        </TableHead>
         <TableBody>
             {props.lines.map(line => <TableRow hover key={line.id} className={line.hidden ? classes.hidden : ""}>
                 <TableCell onClick={() => handleDisplayRecap(line.id)} style={{width: "100%"}}>
                     <Bullet variant={(line.amount + line.alreadyPaid > line.expected ? "alert" : "cool")}/>
                     {line.label}<br/>
-                    {isXsScreen ? <p className={classes.amounts}>
+                    <p className={classes.amounts}>
                         <span>{formatNumber(line.amount + line.alreadyPaid)}</span> | <span>{formatNumber(line.expected)}</span>
-                    </p> : null}
+                    </p>
                     <span className={classes.endAt}>
                         <FontAwesomeIcon icon={faCalendarAlt}/>
                         {line.endAt.format("MM/YYYY")}
                     </span>
                 </TableCell>
-                {isXsScreen ? null : <TableCell>{formatNumber(line.amount + line.alreadyPaid)}</TableCell>}
-                {isXsScreen ? null : <TableCell>{formatNumber(line.expected)}</TableCell>}
                 <TableCell className={classes.tools}>
                     <Link to={`/projets/${line.id}/ajout-depense`}>
                         <IconButton aria-label="Ajouter une dépense" className={classes.tool}>

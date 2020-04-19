@@ -12,7 +12,8 @@ const useStyles = makeStyles(theme => ({
         fontWeight: 200,
         borderBottomWidth: 1,
         borderStyle: "solid",
-        borderImage: `linear-gradient(to right, ${pink[700]}, ${red[700]}, rgba(0,0,0,0)) 0 1 100%`
+        borderImage: `linear-gradient(to right, ${pink[700]}, ${red[700]}, rgba(0,0,0,0)) 0 1 100%`,
+        color: theme.palette.text.primary
     }
 }));
 

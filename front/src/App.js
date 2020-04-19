@@ -12,19 +12,18 @@ import {
     Saving,
     Login
 } from './pages';
-import {BrowserRouter as Router, Route, NavLink, useLocation} from "react-router-dom";
-import {createMuiTheme, makeStyles, useTheme} from '@material-ui/core/styles';
+import {BrowserRouter as Router, Route} from "react-router-dom";
+import {createMuiTheme, makeStyles} from '@material-ui/core/styles';
 import {
     CssBaseline,
     ThemeProvider,
     useMediaQuery
 } from "@material-ui/core";
-import {pink, red, grey, purple, green} from "@material-ui/core/colors";
+import {pink, indigo} from "@material-ui/core/colors";
 
 import store from "./AppStore";
 import Api from './core/Api';
 
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
     faCogs,
     faDatabase, faFileInvoiceDollar, faPiggyBank, faSearchDollar,
@@ -40,7 +39,11 @@ const useStyles = makeStyles(theme => ({
     },
     content: {
         flexGrow: 1,
-        paddingBottom: 50
+        paddingTop: theme.spacing(),
+        paddingLeft: `max(${theme.spacing()}px, env(safe-area-inset-left))`,
+        paddingRight: `max(${theme.spacing()}px, env(safe-area-inset-right))`,
+        paddingBottom: `calc(66px + ${theme.spacing()}px + env(safe-area-inset-bottom))`,
+        overflow: "scroll"
     }
 }));
 
@@ -53,10 +56,11 @@ export default React.memo(() => {
     const theme = React.useMemo(
         () =>
             createMuiTheme({
+                spacing: 4,
                 palette: {
                     primary: pink,
-                    secondary: green,
-                    type: prefersDarkMode ? 'dark' : 'light',
+                    secondary: indigo,
+                    type: prefersDarkMode || true ? 'dark' : 'light',
                 },
                 shape: {
                     borderRadius: 2
@@ -98,9 +102,9 @@ export default React.memo(() => {
         <CssBaseline/>
         <ThemeProvider theme={theme}>
             {isLoading || isInitialLoading ? <MainLoading/> : null}
-            {isInitialLoading ? null : <div>
+            {isInitialLoading ? null : <div style={{background: theme.palette.background.default}}>
                 {!isSignedId ? <Login onSuccess={onLoadingSuccess} onReady={() => setIsLoading(false)}/> :
-                    <div style={{background: theme.palette.background.default, minHeight: 'calc(var(--vh, 1vh) * 100)'}}>
+                    <div style={{minHeight: 'calc(var(--vh, 1vh) * 100)'}}>
                         <main className={classes.content}>
                             <Route path="/" exact component={Dashboard}/>
                             <Route path="/comptes-epargne" component={Saving}/>

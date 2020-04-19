@@ -108,7 +108,7 @@ export default React.memo((props) => {
                 >
                     {props.secondaryLinks.map((link, i) => <NavLink key={i} to={link.to} className={classes.menuItem}
                                                                     activeClassName={classes.activeMenuItem}
-                                                                    exact={!!link.exact}>
+                                                                    exact={!!link.exact} onClick={() => handleClose()}>
                         <ListItem button className={classes.secondaryItem}>
                             <ListItemIcon className={classes.secondaryItemIcon}>
                                 <FontAwesomeIcon icon={link.icon} style={link.iconStyle || {}}/>

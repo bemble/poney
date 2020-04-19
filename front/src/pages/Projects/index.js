@@ -3,7 +3,7 @@ import {
     Fab, makeStyles, Switch, FormControlLabel
 } from "@material-ui/core";
 import {Add as AddIcon} from "@material-ui/icons";
-import Title from "../../components/Title";
+import TopRightLoading from "../../components/TopRightLoading";
 import Loading from "../../components/Loading";
 import EditDialog from "./EditDialog";
 import List from "./List";
@@ -13,8 +13,11 @@ import {useParams, useHistory} from "react-router-dom";
 import Api from "../../core/Api";
 
 const useStyles = makeStyles(theme => ({
+    switch: {
+        color: theme.palette.text.secondary
+    },
     tools: {
-      padding: theme.spacing(1)
+        padding: theme.spacing(1)
     },
     fab: {
         position: 'fixed',
@@ -25,7 +28,7 @@ const useStyles = makeStyles(theme => ({
 
 export default React.memo(() => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isInnerLoading, setIsInnerLoading] = useState(true);
+    const [isInnerLoading, setIsInnerLoading] = useState(false);
     const [data, setData] = useState([]);
     const [edit, setEdit] = useState(null);
     const [showHidden, setShowHidden] = useState(false);
@@ -69,10 +72,11 @@ export default React.memo(() => {
     const classes = useStyles();
 
     return <div>
-        <Title displayLoading={isInnerLoading}>Projets</Title>
         {isLoading ? <Loading/> : null}
+        <TopRightLoading visible={isInnerLoading}/>
         {!isLoading && data && data.filter(l => l.hidden).length ? <div className={classes.tools}>
-            <FormControlLabel control={<Switch onChange={(e) => setShowHidden(e.target.checked)} checked={showHidden}/>}
+            <FormControlLabel className={classes.switch}
+                              control={<Switch onChange={(e) => setShowHidden(e.target.checked)} checked={showHidden}/>}
                               label="Afficher les projets cachés"/>
         </div> : null}
         {!isLoading && data ?
