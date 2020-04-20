@@ -81,7 +81,7 @@ export default React.memo((props) => {
                          onClick={() => history.push("/comptes-epargne")}/>
             </Grid>
             <Grid item xs={12}>
-                <AccountWeather lastSynchUpdate={lastSynch && lastSynch.runnedAt || 0} warning={warning}/>
+                <AccountWeather lastSynchUpdate={(lastSynch && lastSynch.runnedAt) || 0} warning={warning}/>
             </Grid>
         </Grid>
     </div>;

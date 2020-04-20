@@ -1,12 +1,11 @@
 import React, {useState} from "react";
 
-import {AppBar, ListItem, ListItemIcon, ListItemText, Toolbar, Menu, MenuItem} from "@material-ui/core";
+import {AppBar, ListItem, ListItemIcon, ListItemText, Toolbar, Menu} from "@material-ui/core";
 import {NavLink} from "react-router-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {makeStyles} from "@material-ui/core/styles";
 import {faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 
-let theme = null;
 const useStyles = makeStyles(theme => ({
     appBar: {
         top: 'auto',

@@ -5,33 +5,25 @@ import {
     TableBody,
     TableCell,
     TableHead,
-    TableRow
+    TableRow,
 } from "@material-ui/core";
-import {grey} from "@material-ui/core/colors";
 import BudgetLine from "./BudgetLine";
 import store from "./Store";
 
-const useStyles = makeStyles({
-    root: {
-        "& .MuiTableCell-sizeSmall": {
-            padding: 2
-        },
-        "& .MuiInputBase-input": {
-            fontSize: 12,
-            lineHeight: "0.9em"
-        }
-    },
-    title: {
-        background: grey[700],
-        color: grey[50],
-        fontSize: 20,
-        fontWeight: 200,
-        textAlign: "center"
-    },
+const useStyles = makeStyles(theme => ({
     tools: {
-        width: 44
+        width: "60px !important",
+        minWidth: "60px !important"
+    },
+    amount: {
+        width: 70,
+        paddingRight: 0
+    },
+    dayOfMonth: {
+        width: 46,
+        paddingRight: 0
     }
-});
+}));
 
 const createLine = (id = -1) => ({
     id,
@@ -44,7 +36,7 @@ const createLine = (id = -1) => ({
 
 export default React.memo((props) => {
     const initialLines = [...props.lines.map(e => {
-        if(!(e.categories instanceof Array)) {
+        if (!(e.categories instanceof Array)) {
             e.categories = (e.categories || "").split('|').filter(e => !!e.trim().length);
         }
         return e;
@@ -77,24 +69,19 @@ export default React.memo((props) => {
         }
     };
 
-    return <Table className={classes.root}>
+    return <Table>
         <TableHead>
             <TableRow>
-                <TableCell className={classes.title}
-                           colSpan={6}>{props.isIncome ? "Crédits" : "Débits"}</TableCell>
-            </TableRow>
-            <TableRow>
-                <TableCell className={classes.tools}/>
                 <TableCell>Libelle</TableCell>
-                <TableCell>Montant</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Categories</TableCell>
-                <TableCell>Jour du mois</TableCell>
+                <TableCell className={classes.amount}>Montant</TableCell>
+                <TableCell className={classes.dayOfMonth}>Jour</TableCell>
+                <TableCell className={classes.tools}/>
             </TableRow>
         </TableHead>
         <TableBody>
             {lines.map((line) => <BudgetLine key={line.id} {...line} onDeleted={handleOnDeleted}
-                                                onCreated={handleOnCreated}/>)}
+                                             onCreated={handleOnCreated}
+                                             onEdit={() => props.onEditLine && props.onEditLine(line)}/>)}
         </TableBody>
     </Table>;
 });

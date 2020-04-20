@@ -8,12 +8,15 @@ import {grey} from "@material-ui/core/colors";
 import Tools from "./Tools";
 import LineInput from "./LineInput";
 
-import {operationKinds, linxoCategories} from "./core";
+import {operationKinds} from "./core";
 
-const useStyle = makeStyles({
+const useStyle = makeStyles(theme => ({
     root: {
+        "& .MuiTableCell-root": {
+            verticalAlign: "top"
+        },
         "& .MuiTableCell-sizeSmall": {
-            padding: 2
+            padding: 4
         },
         "& .MuiInputBase-input": {
             fontSize: 12,
@@ -27,10 +30,18 @@ const useStyle = makeStyles({
         fontWeight: 200,
         textAlign: "center"
     },
-    tools: {
-        width: 56
+    sub: {
+        fontSize: 10,
+        color: theme.palette.text.hint
+    },
+    color: {
+        width: 8,
+        height: 8,
+        display: "inline-block",
+        borderRadius: 4,
+        marginRight: 4
     }
-});
+}));
 
 export default React.memo((props) => {
     const classes = useStyle();
@@ -42,19 +53,29 @@ export default React.memo((props) => {
         props.onCreated && props.onCreated(props.id);
     };
 
-    const fields = {
-        "label": {},
-        "amount": {number: true, isIncome: !!props.isIncome, alignRight: true},
-        "operationKind": {possibleValues: operationKinds},
-        "categories": {possibleValues: linxoCategories, grouped: true},
-        "dayOfMonth": {}
+    const getOperationKindLabel = (operationKind) => {
+        if (!operationKind) return "";
+        const [elt] = operationKinds.filter(e => e.value === props.operationKind);
+        return elt ? elt.label : "";
     };
-    return <TableRow hover>
-        <TableCell size="small" className={classes.tools}>
-            <Tools {...{...props, id, initialId: id}} onColorChanged={(hex) => setColor(hex)} />
+    return <TableRow hover className={classes.root}>
+        <TableCell size="small">
+            <LineInput value={props.label} id={id} name={"label"} onCreated={onCreated}/><br/>
+            <span className={classes.sub}>
+                <span className={classes.color} style={{backgroundColor: color}}/>
+                {props.categories.join(', ')}
+            </span>
         </TableCell>
-        {Object.entries(fields).map(([name, options], i) => <TableCell key={i} size="small">
-            <LineInput value={props[name]} {...{...options, name, id}} onCreated={onCreated}/>
-        </TableCell>)}
+        <TableCell size="small" align="right">
+            <LineInput value={props.amount} id={id} name={"amount"} number={true} isIncome={!!props.isIncome}
+                       alignRight={true} onCreated={onCreated}/><br/>
+            <span className={classes.sub}>{getOperationKindLabel(props.operationKind)}</span>
+        </TableCell>
+        <TableCell size="small">
+            <LineInput value={props.dayOfMonth} id={id} name={"dayOfMonth"} alignRight={true} onCreated={onCreated}/>
+        </TableCell>
+        <TableCell size="small" style={{verticalAlign: "middle"}}>
+            <Tools {...{...props, id, initialId: id}} onColorChanged={(hex) => setColor(hex)}/>
+        </TableCell>
     </TableRow>;
 });

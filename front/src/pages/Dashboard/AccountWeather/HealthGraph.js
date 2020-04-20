@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {XYPlot, VerticalBarSeries, YAxis, XAxis, Hint, makeWidthFlexible} from 'react-vis';
 import moment from "moment";
 import {formatNumber} from "../../../core/Tools";
-import {red, green} from "@material-ui/core/colors";
 import {makeStyles, useTheme} from "@material-ui/core";
 
 const useStyles = makeStyles(theme => {

@@ -4,8 +4,8 @@ import RecapCard from "./RecapCard";
 
 const useStyles = makeStyles(theme => ({
     root: {
-        paddingLeft: 8,
-        paddingRight: 8,
+        paddingLeft: 0,
+        paddingRight: 0,
         paddingTop: 4,
         paddingBottom: 4,
         [theme.breakpoints.down("xs")]: {

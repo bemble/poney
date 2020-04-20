@@ -8,7 +8,7 @@ import {
     TableCell,
     Fab,
     Checkbox,
-    IconButton
+    IconButton, Switch, FormControlLabel
 } from "@material-ui/core";
 import {Link} from 'react-router-dom';
 import {
@@ -31,7 +31,7 @@ const styles = theme => ({
     inUse: {paddingRight: 0},
     fab: {
         position: 'fixed',
-        bottom: theme.spacing(2),
+        bottom: `calc(64px + ${theme.spacing(2)}px)`,
         right: theme.spacing(2),
     },
     link: {
@@ -104,8 +104,9 @@ class Budgets extends React.PureComponent {
                 </TableHead>
                 <TableBody>
                     {data.map(line => <TableRow key={line.id}>
-                        <TableCell><Checkbox checked={!!line.inUse}
-                                             onChange={() => this.handleChangeUse(line.id)}/></TableCell>
+                        <TableCell>
+                            <Switch onChange={() => this.handleChangeUse(line.id)} checked={!!line.inUse}/>
+                        </TableCell>
                         <TableCell>
                             <Link to={`/budgets/${line.id}`} className={classes.link}>
                                 {line.label}<br/>
@@ -125,7 +126,6 @@ class Budgets extends React.PureComponent {
                                         className={classes.tool}>
                                 <FontAwesomeIcon icon={faTrash}/>
                             </IconButton>
-
                         </TableCell>
                     </TableRow>)}
                 </TableBody>

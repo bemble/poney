@@ -5,13 +5,10 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableHead,
-    TableRow,
-    useMediaQuery,
-    useTheme
+    TableRow
 } from "@material-ui/core";
 import {Link, useHistory} from "react-router-dom";
-import {blueGrey, grey, indigo} from "@material-ui/core/colors";
+import {blueGrey} from "@material-ui/core/colors";
 import {formatNumber} from "../../core/Tools";
 import Bullet from "../../components/Bullet";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'

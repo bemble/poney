@@ -1,16 +1,16 @@
-import {Checkbox, FormControl, Input, ListItemText, makeStyles, MenuItem, Select} from "@material-ui/core";
+import {Checkbox, FormControl, TextField, ListItemText, makeStyles, MenuItem, Select, InputLabel} from "@material-ui/core";
 import React, {useEffect, useState} from "react";
 import {updateField} from "./core";
-import {grey} from "@material-ui/core/colors";
 import store from "../Store";
 
-const useStyle = makeStyles({
+const useStyle = makeStyles(theme => ({
     parentCategory: {
         padding: 8,
-        border: `1px solid ${grey[300]}`,
-        background: grey[200]
+        border: `1px solid ${theme.palette.background.default}`,
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary
     }
-});
+}));
 
 let savedTimeout = null;
 
@@ -71,7 +71,8 @@ export default function LineInput(props) {
 
     if (props.possibleValues) {
         if (props.grouped && typeof value !== "string") {
-            return <FormControl>
+            return <FormControl fullWidth>
+                {props.label ? <InputLabel>{props.label}</InputLabel> : null}
                 <Select multiple value={value}
                         onChange={handleChange}
                         renderValue={selected => selected.join('; ')}
@@ -86,12 +87,15 @@ export default function LineInput(props) {
                 </Select>
             </FormControl>;
         }
-        return <Select value={value} onChange={handleChange}>
-            {props.possibleValues.map((v, i) => <MenuItem value={v.value} key={i}>{v.label}</MenuItem>)}
-        </Select>;
+        return <FormControl fullWidth>
+            {props.label ? <InputLabel>{props.label}</InputLabel> : null}
+                <Select value={value} onChange={handleChange} label={props.label || ""}>
+                {props.possibleValues.map((v, i) => <MenuItem value={v.value} key={i}>{v.label}</MenuItem>)}
+            </Select>
+        </FormControl>;
     }
 
     const inputProps = props.alignRight ? {style: {textAlign: "right"}} : {};
 
-    return <Input value={value} inputProps={inputProps} onChange={handleChange} onBlur={handleBlur}/>;
+    return <TextField value={value} inputProps={inputProps} onChange={handleChange} onBlur={handleBlur} fullWidth label={props.label || ""}/>;
 }

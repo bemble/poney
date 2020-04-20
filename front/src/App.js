@@ -3,7 +3,6 @@ import {
     Dashboard,
     Monitoring,
     Configuration,
-    Database,
     Budgets,
     Budget,
     Projects,
@@ -60,7 +59,7 @@ export default React.memo(() => {
                 palette: {
                     primary: pink,
                     secondary: indigo,
-                    type: prefersDarkMode || true ? 'dark' : 'light',
+                    type: prefersDarkMode ? 'dark' : 'light',
                 },
                 shape: {
                     borderRadius: 2
@@ -91,7 +90,6 @@ export default React.memo(() => {
     const secondaryLinks = [
         {to: "/suivi", label: "Suivi", icon: faSearchDollar, iconStyle: {marginLeft: 2, marginRight: -2}},
         {to: "/comptes-epargne", label: "Comptes épargne", icon: faPiggyBank},
-        {to: "/database", label: "Base de données", icon: faDatabase, iconStyle: {marginLeft: 2, marginRight: -2}},
         {to: "/configuration", label: "Configuration", icon: faCogs}
     ];
     secondaryLinks.reverse();
@@ -115,7 +113,6 @@ export default React.memo(() => {
                             <Route path="/budgets" exact component={Budgets}/>
                             <Route path="/budgets/:id" exact component={Budget}/>
                             <Route path="/suivi" component={Monitoring}/>
-                            <Route path="/database" component={Database}/>
                             <Route path="/configuration" component={Configuration}/>
                         </main>
                         <AppBar links={links} secondaryLinks={secondaryLinks}/>
