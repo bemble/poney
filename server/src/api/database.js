@@ -12,6 +12,7 @@ router.get('/:tableName', async (req, res) => {
         const models = await Model.getAll(jsonQuery);
         return res.json(models);
     } catch (e) {
+        console.error(e);
         return res.status(500).json({message: "An error occurred", details: e.message})
     }
 });
@@ -38,6 +39,7 @@ router.get('/:tableName/:id', async (req, res) => {
         }
         return res.json(model);
     } catch (e) {
+        console.error(e);
         return res.status(500).json({message: "An error occurred", details: e.message})
     }
 });
@@ -53,6 +55,7 @@ router.post('/:tableName', async (req, res) => {
         const model = await Model.insert(jsonQuery);
         return res.json(model);
     } catch (e) {
+        console.error(e);
         return res.status(500).json({message: "An error occurred", details: e.message})
     }
 });
@@ -73,6 +76,7 @@ router.patch('/:tableName/:id', async (req, res) => {
         const model = await Model.update(jsonQuery);
         return res.json(model);
     } catch (e) {
+        console.error(e);
         return res.status(500).json({message: "An error occurred", details: e.message})
     }
 });
@@ -92,6 +96,7 @@ router.delete('/:tableName/:id', async (req, res) => {
         await Model.delete(jsonQuery);
         return res.status(204).send();
     } catch (e) {
+        console.error(e);
         return res.status(500).json({message: "An error occurred", details: e.message})
     }
 });
@@ -107,6 +112,7 @@ router.post('/search/:tableName', async (req, res) => {
         const models = await Model.getAll(jsonQuery);
         return res.json(models);
     } catch (e) {
+        console.error(e);
         return res.status(500).json({message: "An error occurred", details: e.message})
     }
 });

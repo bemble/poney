@@ -1,8 +1,8 @@
 import {createStore} from 'redux';
 
 const initialState = {
-    isMenuOpen: false,
     token: "",
+    hasUpdate: false,
     config: {}
 };
 
@@ -18,17 +18,11 @@ function appReducer(state = initialState, action) {
 }
 
 const store = createStore(appReducer);
-store.toggleMenu = () => {
-    store.dispatch({type: "SET", isMenuOpen: !store.getState().isMenuOpen});
-};
-store.openMenu = () => {
-    store.dispatch({type: "SET", isMenuOpen: true});
-};
-store.closeMenu = () => {
-    store.dispatch({type: "SET", isMenuOpen: false});
-};
 store.setToken = (token) => {
     store.dispatch({type: "SET", token});
+};
+store.setHasUpdate = (hasUpdate) => {
+    store.dispatch({type: "SET", hasUpdate});
 };
 
 export default store;

@@ -24,7 +24,6 @@ import {
 } from "@material-ui/core/colors";
 
 import {BlockPicker} from "react-color";
-import Api from "../../../core/Api";
 import {makeStyles} from "@material-ui/core/styles";
 
 
@@ -85,7 +84,7 @@ export default React.memo((props) => {
         "label": {label: "Libellé"},
         "amount": {label: "Montant", number: true, isIncome: !!props.isIncome},
         "operationKind": {label: "Type d'opération", possibleValues: operationKinds},
-        "categories": {label: "Catégories Linxo", possibleValues: linxoCategories, grouped: true},
+        "categories": {label: "Catégories Linxo", possibleValues: linxoCategories, joinWith: "|"},
         "dayOfMonth": {label: "Jour du mois"}
     };
 

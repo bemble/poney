@@ -58,12 +58,12 @@ export default function Budget(props) {
             </Tabs>
             <Paper hidden={currentPanel !== 0}>
                 <BudgetTable budgetId={props.match.params.id} lines={lines.filter(d => !d.isIncome)}
-                             onEditLine={(line) => setEdit(line)}/>
+                             onEditLine={(line) => console.log(line) || setEdit(line)}/>
             </Paper>
             <Paper hidden={currentPanel !== 1}>
                 <BudgetTable budgetId={props.match.params.id} isIncome={true}
                              lines={lines.filter(d => !!d.isIncome)}
-                             onEditLine={(line) => setEdit(line)}/>
+                             onEditLine={(line) => console.log(line) || setEdit(line)}/>
             </Paper>
             {displayDialog || edit ? <EditDialog onClose={(saved) => handleClose(saved)} {...edit}/> : null}
         </div> : null}

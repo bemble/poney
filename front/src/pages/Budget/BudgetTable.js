@@ -55,10 +55,11 @@ export default React.memo((props) => {
         store.refreshFromDatabase(props.budgetId);
     };
 
-    const handleOnCreated = async (id) => {
+    const handleOnCreated = async (id, newId) => {
         const index = lines.findIndex(l => l.id === id);
         if (index >= 0) {
             const newLines = [...lines];
+            newLines[index].newId = newId;
             let minId = Math.min(...lines.map(l => l.id));
             if (minId > 0) {
                 minId = 0;

@@ -50,7 +50,7 @@ export default React.memo((props) => {
 
     const onCreated = (newId) => {
         setId(newId);
-        props.onCreated && props.onCreated(props.id);
+        props.onCreated && props.onCreated(props.id, newId);
     };
 
     const getOperationKindLabel = (operationKind) => {

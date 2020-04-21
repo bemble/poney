@@ -1,4 +1,13 @@
-import {Checkbox, FormControl, TextField, ListItemText, makeStyles, MenuItem, Select, InputLabel} from "@material-ui/core";
+import {
+    Checkbox,
+    FormControl,
+    TextField,
+    ListItemText,
+    makeStyles,
+    MenuItem,
+    Select,
+    InputLabel
+} from "@material-ui/core";
 import React, {useEffect, useState} from "react";
 import {updateField} from "./core";
 import store from "../Store";
@@ -15,7 +24,7 @@ const useStyle = makeStyles(theme => ({
 let savedTimeout = null;
 
 export default function LineInput(props) {
-    const [value, setValue] = useState(props.grouped ? "" : []);
+    const [value, setValue] = useState(props.joinWith ? "" : []);
     const [id, setId] = useState(props.id);
     const [saved, setSaved] = useState(false);
 
@@ -24,14 +33,19 @@ export default function LineInput(props) {
     }, [props.value]);
 
     useEffect(() => {
-        if(props.id !== id) {
+        if (props.id !== id) {
             setId(props.id);
         }
     }, [props.id]);
 
     const save = async (changeValue) => {
         if (!saved) {
-            const newId = await updateField(id, props.name, changeValue === undefined ? value : changeValue);
+            let newValue = changeValue === undefined ? value : changeValue;
+            if (props.joinWith) {
+                newValue = newValue.join(props.joinWith);
+            }
+
+            const newId = await updateField(id, props.name, newValue);
             if (id < 0) {
                 setId(newId);
                 props.onCreated && props.onCreated(newId);
@@ -70,7 +84,7 @@ export default function LineInput(props) {
     const classes = useStyle();
 
     if (props.possibleValues) {
-        if (props.grouped && typeof value !== "string") {
+        if (props.joinWith && typeof value !== "string") {
             return <FormControl fullWidth>
                 {props.label ? <InputLabel>{props.label}</InputLabel> : null}
                 <Select multiple value={value}
@@ -89,7 +103,7 @@ export default function LineInput(props) {
         }
         return <FormControl fullWidth>
             {props.label ? <InputLabel>{props.label}</InputLabel> : null}
-                <Select value={value} onChange={handleChange} label={props.label || ""}>
+            <Select value={value} onChange={handleChange} label={props.label || ""}>
                 {props.possibleValues.map((v, i) => <MenuItem value={v.value} key={i}>{v.label}</MenuItem>)}
             </Select>
         </FormControl>;
@@ -97,5 +111,6 @@ export default function LineInput(props) {
 
     const inputProps = props.alignRight ? {style: {textAlign: "right"}} : {};
 
-    return <TextField value={value} inputProps={inputProps} onChange={handleChange} onBlur={handleBlur} fullWidth label={props.label || ""}/>;
+    return <TextField value={value} inputProps={inputProps} onChange={handleChange} onBlur={handleBlur} fullWidth
+                      label={props.label || ""}/>;
 }

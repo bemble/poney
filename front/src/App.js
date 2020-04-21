@@ -22,10 +22,10 @@ import {pink, indigo} from "@material-ui/core/colors";
 
 import store from "./AppStore";
 import Api from './core/Api';
+import Update from "./components/Update";
 
 import {
-    faCogs,
-    faDatabase, faFileInvoiceDollar, faPiggyBank, faSearchDollar,
+    faCogs, faFileInvoiceDollar, faPiggyBank, faSearchDollar,
     faTachometerAlt, faUmbrellaBeach
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -39,9 +39,9 @@ const useStyles = makeStyles(theme => ({
     content: {
         flexGrow: 1,
         paddingTop: theme.spacing(),
-        paddingLeft: `max(${theme.spacing()}px, env(safe-area-inset-left))`,
-        paddingRight: `max(${theme.spacing()}px, env(safe-area-inset-right))`,
-        paddingBottom: `calc(66px + ${theme.spacing()}px + env(safe-area-inset-bottom))`,
+        paddingLeft: `max(4px, env(safe-area-inset-left))`,
+        paddingRight: `max(4px, env(safe-area-inset-right))`,
+        paddingBottom: `calc(66px + 4px + env(safe-area-inset-bottom))`,
         overflow: "scroll"
     }
 }));
@@ -50,6 +50,7 @@ export default React.memo(() => {
     const [isSignedId, setIsSignedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [showUpdateAvailable, setShowUpdateAvailable] = useState(false);
 
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const theme = React.useMemo(
@@ -69,6 +70,17 @@ export default React.memo(() => {
     );
 
     useEffect(() => {
+        store.subscribe(() => {
+            const {token, hasUpdate} = store.getState();
+            if (token && !isSignedId) {
+                setIsSignedIn(true);
+            } else if (!token && isSignedId) {
+                setIsSignedIn(false);
+            }
+
+            setShowUpdateAvailable(hasUpdate);
+        });
+
         (async () => {
             const config = await Api.fetch('/public/config');
             store.dispatch({type: "SET", config});
@@ -118,6 +130,7 @@ export default React.memo(() => {
                         <AppBar links={links} secondaryLinks={secondaryLinks}/>
                     </div>}
             </div>}
+            <Update open={showUpdateAvailable} />
         </ThemeProvider>
     </Router>;
 });

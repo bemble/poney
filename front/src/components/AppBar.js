@@ -10,10 +10,11 @@ const useStyles = makeStyles(theme => ({
     appBar: {
         top: 'auto',
         bottom: 0,
-        background: theme.palette.background.paper
+        marginBottom: `env(safe-area-inset-bottom)`
     },
     bar: {
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        background: theme.palette.background.paper
     },
     menuItem: {
         color: theme.palette.text.hint,
@@ -93,10 +94,6 @@ export default React.memo((props) => {
                     <ListItemText className={classes.itemText} primary={"Plus"}/>
                 </ListItem>
                 <Menu id="menu-appbar" anchorEl={anchorEl}
-                      anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'right',
-                      }}
                       keepMounted
                       transformOrigin={{
                           vertical: 'bottom',
