@@ -10,11 +10,11 @@ const useStyles = makeStyles(theme => ({
     appBar: {
         top: 'auto',
         bottom: 0,
-        marginBottom: `env(safe-area-inset-bottom)`
+        background: theme.palette.background.paper,
+        paddingBottom: `env(safe-area-inset-bottom)`
     },
     bar: {
-        justifyContent: "space-between",
-        background: theme.palette.background.paper
+        justifyContent: "space-between"
     },
     menuItem: {
         color: theme.palette.text.hint,
@@ -25,12 +25,9 @@ const useStyles = makeStyles(theme => ({
         }
     },
     activeMenuItem: {
-        color: theme.palette.primary.contrastText,
+        color: theme.palette.primary.main,
         "& svg": {
-            color: theme.palette.primary.contrastText,
-        },
-        "& > *, &:hover": {
-            background: theme.palette.primary.dark
+            color: theme.palette.primary.main,
         }
     },
     item: {

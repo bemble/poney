@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     },
     fab: {
         position: 'fixed',
-        bottom: `calc(64px + ${theme.spacing(2)}px)`,
+        bottom: `calc(64px + ${theme.spacing(2)}px + env(safe-area-inset-bottom))`,
         right: theme.spacing(2),
     },
     tables: {
