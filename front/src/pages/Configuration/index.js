@@ -58,7 +58,7 @@ export default class Configuration extends React.Component {
 
     render() {
         const {isLoading, accounts, accountSettings, loadingCount, currentPanel} = this.state;
-        const hasCbDiff = accounts.some(a => accountSettings[a.id] === "deferredDebitCreditCard");
+        const hasDeferredCard = accounts.some(a => accountSettings[a.id] === "deferredCard");
 
         // handle loading !!!!!
 
@@ -75,7 +75,7 @@ export default class Configuration extends React.Component {
                     >
                         <Tab label="Alertes"/>
                         <Tab label="Comptes"/>
-                        {hasCbDiff ? <Tab label="Débit différé"/> : null}
+                        {hasDeferredCard ? <Tab label="Débit différé"/> : null}
                     </Tabs>
                     <TopRightLoading visible={loadingCount > 0}/>
                     <div hidden={currentPanel !== 0}>

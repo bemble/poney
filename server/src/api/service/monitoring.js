@@ -42,10 +42,10 @@ class Monitoring {
     }
 
     async getData() {
-        const hasDeferredCreditCard = !!(await Accounts.conditions()).deferredDebitCreditCard.length;
+        const hasDeferredCard = !!(await Accounts.conditions()).deferredCard.length;
         const conditions = await Accounts.conditions();
 
-        const data = {date: this.start, credits: [], debits: [], deferredDebitCreditCard: []};
+        const data = {date: this.start, credits: [], debits: [], deferredCard: []};
         const db = await Database;
         if (moment.utc(this.start, 'X').isSameOrBefore(moment(), "day")) {
             data.credits = await db.all(`
@@ -60,11 +60,11 @@ class Monitoring {
                 ...l,
                 amount: Math.abs(l.amount)
             }));
-            if (hasDeferredCreditCard) {
-                data.deferredCreditCard = (await db.all(`SELECT * FROM
+            if (hasDeferredCard) {
+                data.deferredCard = (await db.all(`SELECT * FROM
         rawData
         WHERE
-        date = ? AND amount < ? AND(${conditions.deferredDebitCreditCard.join(' OR ')})`, [this.start, 0])).map(l => ({
+        date = ? AND amount < ? AND(${conditions.deferredCard.join(' OR ')})`, [this.start, 0])).map(l => ({
                     ...l,
                     amount: Math.abs(l.amount)
                 }));
@@ -85,16 +85,16 @@ class Monitoring {
             budgetLines.forEach(line => {
                 if (line.isIncome) {
                     data.credits.push(line);
-                } else if (hasDeferredCreditCard && line.operationKind === "creditCard") {
-                    data.deferredDebitCreditCard.push(line);
+                } else if (hasDeferredCard && line.operationKind === "creditCard") {
+                    data.deferredCard.push(line);
                 } else {
                     data.debits.push(line);
                 }
             });
-            const deferredCreditCardDebits = await this.deferredCreditCardDebits();
-            if (deferredCreditCardDebits[formatDate(moment.utc(this.start, 'X'))]) {
+            const deferredCardDebits = await this.deferredCardDebits();
+            if (deferredCardDebits[formatDate(moment.utc(this.start, 'X'))]) {
                 data.debits.push({
-                    amount: deferredCreditCardDebits[formatDate(moment.utc(this.start, 'X'))],
+                    amount: deferredCardDebits[formatDate(moment.utc(this.start, 'X'))],
                     label: "Total carte débit différé"
                 });
             }
@@ -103,12 +103,12 @@ class Monitoring {
     }
 
     async getAggregatedData() {
-        const hasDeferredCreditCard = !!(await Accounts.conditions()).deferredDebitCreditCard.length;
+        const hasDeferredCard = !!(await Accounts.conditions()).deferredCard.length;
         const linesByDay = {};
         const budget = await this.budget();
         const lines = await this.aggregatedLines();
-        const deferredCreditCard = await this.deferredCreditCard();
-        const deferredCreditCardDebits = await this.deferredCreditCardDebits();
+        const deferredCard = await this.deferredCard();
+        const deferredCardDebits = await this.deferredCardDebits();
 
         lines.forEach(line => {
             linesByDay[formatDate(line.date)] = line;
@@ -123,12 +123,12 @@ class Monitoring {
                 date: curMoment.unix(),
                 credits: 0,
                 debits: 0,
-                deferredDebitCreditCard: 0,
+                deferredCard: 0,
                 amount: lastAmount
             };
 
-            if (deferredCreditCard[formattedDate]) {
-                data.deferredDebitCreditCard = deferredCreditCard[formattedDate];
+            if (deferredCard[formattedDate]) {
+                data.deferredCard = deferredCard[formattedDate];
             }
 
             if (linesByDay[formattedDate]) {
@@ -140,15 +140,15 @@ class Monitoring {
                 const day = curMoment.date();
                 if (budget && budget[day]) {
                     data.credits = budget[day].credits;
-                    data.debits = budget[day].debits + (deferredCreditCardDebits[formattedDate] || 0);
-                    data.amount = lastAmount + budget[day].credits - budget[day].debits - (deferredCreditCardDebits[formattedDate] || 0);
+                    data.debits = budget[day].debits + (deferredCardDebits[formattedDate] || 0);
+                    data.amount = lastAmount + budget[day].credits - budget[day].debits - (deferredCardDebits[formattedDate] || 0);
                     lastAmount = data.amount;
                 }
             }
             dataByDay.push(data);
             curMoment.add(1, "days");
         }
-        return {lines: dataByDay, hasDeferredCreditCard};
+        return {lines: dataByDay, hasDeferredCard};
     }
 
     async aggregatedLines() {
@@ -172,7 +172,7 @@ class Monitoring {
                                    SUM(
                                        CASE WHEN (isIncome <= ? AND operationKind != ?) THEN amount ELSE 0 END) AS debits,
                                    SUM(
-                                       CASE WHEN (isIncome <= ? AND operationKind = ?) THEN amount ELSE 0 END)  AS deferredCreditCard
+                                       CASE WHEN (isIncome <= ? AND operationKind = ?) THEN amount ELSE 0 END)  AS deferredCard
                             FROM budgetLine
                                    JOIN budget b ON idBudget = b.id
                             WHERE b.inUse = ?
@@ -185,9 +185,9 @@ class Monitoring {
         return this._budget;
     }
 
-    async deferredCreditCard() {
+    async deferredCard() {
         const conditions = await Accounts.conditions();
-        if (!conditions.deferredDebitCreditCard.length) {
+        if (!conditions.deferredCard.length) {
             return {};
         }
 
@@ -196,24 +196,35 @@ class Monitoring {
         startMoment.subtract(1, 'm');
         const endMoment = moment.utc(Math.max(this.end, moment().unix()), 'X');
 
+        /* Find the months in the given period */
+        /* /!\ In database, january is 1 */
         let monthCondition = "(month >= ? AND year = ?) AND (month <= ? AND year = ?)";
         let monthParams = [startMoment.month() - 2, startMoment.year(), endMoment.month() + 1, endMoment.year()];
         for (let i = startMoment.year() + 1; i < endMoment.year(); i++) {
             monthCondition += " OR (year = ?)";
             monthParams = [...monthParams, i];
         }
-        const endCbDays = await db.all(`SELECT *
+        const endDeferredCardDays = await db.all(`SELECT *, (month - 1) AS month
                                             FROM creditCardCalendar
                                             WHERE ${monthCondition}
+                                            AND id > 0
                                             ORDER BY year ASC, month ASC`, monthParams);
+
+        /* Transform calendar to periods */
         const triggers = {};
-        endCbDays.forEach((d, i) => {
-            if (i > 0) {
-                const start = moment(getDateStr(endCbDays[i - 1])).unix() + 24 * 60 * 60;
-                const end = moment(getDateStr(d)).unix();
-                triggers[formatDate(d)] = {start, end};
-            }
-        });
+        endDeferredCardDays
+            .forEach((d, i, endDays) => {
+                if (i > 0) {
+                    const startStr = getDateStr(endDays[i - 1]);
+                    const startMoment = moment(startStr);
+                    const start = startMoment.unix() + 24 * 60 * 60;
+
+                    const endMoment = moment(getDateStr(d));
+                    const end = endMoment.unix() + 23 * 60 * 60 + 59 * 60;
+
+                    triggers[formatDate(d)] = {start, end};
+                }
+            });
 
         const budget = await this.budget();
 
@@ -224,7 +235,7 @@ class Monitoring {
                   WHERE r2.date <= r.date
                     AND r2.date >= ?
                     AND r2.amount < 0
-                    AND(${conditions.deferredDebitCreditCard.join(' OR ')})) AS amount
+                    AND(${conditions.deferredCard.join(' OR ')})) AS amount
                 FROM rawData r
                 WHERE r.date >= ?
                   AND r.date <= ?
@@ -243,8 +254,8 @@ class Monitoring {
                 if (tmpOperationsByDay[curDateStr]) {
                     lastAmount = tmpOperationsByDay[curDateStr];
                 }
-                if (curMoment > moment() && budget[curMoment.date()] && budget[curMoment.date()].deferredCreditCard) {
-                    lastAmount -= budget[curMoment.date()].deferredCreditCard;
+                if (curMoment > moment() && budget[curMoment.date()] && budget[curMoment.date()].deferredCard) {
+                    lastAmount -= budget[curMoment.date()].deferredCard;
                 }
                 operationsByDay[curDateStr] = Math.abs(lastAmount);
                 curMoment.add(1, 'days');
@@ -260,9 +271,9 @@ class Monitoring {
         return operationsByDay;
     }
 
-    async deferredCreditCardDebits() {
+    async deferredCardDebits() {
         const conditions = await Accounts.conditions();
-        if (!conditions.deferredDebitCreditCard.length) {
+        if (!conditions.deferredCard.length) {
             return {};
         }
 
@@ -277,8 +288,8 @@ class Monitoring {
             let budgetized = 0;
             const budget = await this.budget();
             while (curMoment.unix() <= this.end) {
-                if (curMoment > moment() && budget[curMoment.date()] && budget[curMoment.date()].deferredCreditCard) {
-                    budgetized += budget[curMoment.date()].deferredCreditCard;
+                if (curMoment > moment() && budget[curMoment.date()] && budget[curMoment.date()].deferredCard) {
+                    budgetized += budget[curMoment.date()].deferredCard;
                 }
 
                 if (curMoment.date() === parseInt(value)) {
@@ -287,11 +298,11 @@ class Monitoring {
                     const queryEndMoment = moment(curMoment);
                     queryEndMoment.subtract(1, 'months');
 
-                    const startCalendar = await db.get(`SELECT *
+                    const startCalendar = await db.get(`SELECT *, (month - 1) AS month
                                                         FROM creditCardCalendar
                                                         WHERE month = ?
                                                           AND year = ? `, [queryStartMoment.month() + 1, queryStartMoment.year()]);
-                    const endCalendar = await db.get(`SELECT *
+                    const endCalendar = await db.get(`SELECT *, (month - 1) AS month
                                                       FROM creditCardCalendar
                                                       WHERE month = ?
                                                         AND year = ? `, [queryEndMoment.month() + 1, queryEndMoment.year()]);
@@ -307,7 +318,7 @@ class Monitoring {
                         WHERE amount < ?
                           AND date > ?
                           AND date <= ?
-                          AND(${conditions.deferredDebitCreditCard.join(' OR ')})`, [0, startMoment.unix(), endMoment.unix()]);
+                          AND(${conditions.deferredCard.join(' OR ')})`, [0, startMoment.unix(), endMoment.unix()]);
                     linesByDay[formatDate(curMoment)] = Math.abs(data.amount - budgetized);
                     budgetized = 0;
                 }

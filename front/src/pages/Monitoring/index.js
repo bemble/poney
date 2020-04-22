@@ -68,7 +68,7 @@ const styles = theme => ({
     debit: {
         color: amber[700]
     },
-    deferredDebitCreditCard: {
+    deferredCard: {
         color: blue[500]
     },
     details: {
@@ -116,8 +116,8 @@ class Suivi extends React.PureComponent {
             this.setState({isLoading: true});
             const {start, end} = this.state;
             const data = await Api.service(`monitoring`, null, {start: start.unix(), end: end.unix()});
-            const {lines, hasDeferredCreditCard} = data;
-            this.setState({data: lines, hasDeferredCreditCard, isLoading: false});
+            const {lines, hasDeferredCard} = data;
+            this.setState({data: lines, hasDeferredCard, isLoading: false});
             setTimeout(() => {
                 document.getElementById("yesterday").scrollIntoView({behavior: 'smooth'})
             }, 250);
@@ -125,7 +125,7 @@ class Suivi extends React.PureComponent {
     }
 
     render() {
-        const {isLoading, data, hasDeferredCreditCard, details} = this.state;
+        const {isLoading, data, hasDeferredCard, details} = this.state;
         const {classes} = this.props;
 
         const curMoment = new moment();
@@ -166,14 +166,14 @@ class Suivi extends React.PureComponent {
                                 {line.debits ? <span className={classes.detailsOut}>
                                     <FontAwesomeIcon icon={faLongArrowAltUp}/> {formatNumber(line.debits)}
                                 </span> : null}
-                                {hasDeferredCreditCard ?
+                                {hasDeferredCard ?
                                     <span className={classes.detailsDeferredDebitCreditCard}>
-                                    <FontAwesomeIcon icon={faCreditCard}/> {formatNumber(line.deferredDebitCreditCard)}
+                                    <FontAwesomeIcon icon={faCreditCard}/> {formatNumber(line.deferredCard)}
                                 </span> : null}
                             </span>
                         </TableCell>
                         <TableCell className={classes.tools}>
-                            {(line.credits || line.debits || (i > 0 && line.deferredDebitCreditCard !== data[i - 1].deferredDebitCreditCard)) ?
+                            {(line.credits || line.debits || (i > 0 && line.deferredCard !== data[i - 1].deferredDebitCreditCard)) ?
                                 <IconButton fontSize="small" aria-label="Détails"
                                             onClick={() => displayDetails(line.date)} style={{padding: 1}}>
                                     <SearchIcon fontSize="inherit"/>
@@ -209,10 +209,10 @@ class Suivi extends React.PureComponent {
                             <TableCell className={classes.debit}>{line.label}</TableCell>
                             <TableCell className={classes.debit} align="right">{formatNumber(line.amount)}</TableCell>
                         </TableRow>)}
-                        {details.deferredDebitCreditCard.map((line, i) => <TableRow hover
-                                                                                    key={`deferredDebitCreditCard-${i}`}>
-                            <TableCell className={classes.deferredDebitCreditCard}>{line.label}</TableCell>
-                            <TableCell className={classes.deferredDebitCreditCard}
+                        {details.deferredCard.map((line, i) => <TableRow hover
+                                                                                    key={`deferredCard-${i}`}>
+                            <TableCell className={classes.deferredCard}>{line.label}</TableCell>
+                            <TableCell className={classes.deferredCard}
                                        align="right">{formatNumber(line.amount)}</TableCell>
                         </TableRow>)}
                     </TableBody> : null}

@@ -4,7 +4,7 @@ class Accounts {
     static async conditions() {
         if (!Accounts._conditions) {
             const db = await Database;
-            Accounts._conditions = {checks: [], savings: [], deferredDebitCreditCard: []};
+            Accounts._conditions = {checks: [], savings: [], deferredCard: []};
             await db.all(`SELECT *
                           FROM accountSetting`)
                 .then(settings => {

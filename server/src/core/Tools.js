@@ -9,8 +9,8 @@ module.exports = {
         return (Math.round(n * 100) / 100).toFixed(2);
     },
     getDateStr: (year, month, day) => {
-        if(typeof year === "object") {
-            month = year.month;
+        if (typeof year === "object") {
+            month = year.month + 1;
             day = year.day;
             year = year.year;
         }

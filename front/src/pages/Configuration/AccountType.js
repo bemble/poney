@@ -51,6 +51,6 @@ export default function AccountType(props) {
         <MenuItem value={"-1"}><span className={classes.ignored}>Ignoré</span></MenuItem>
         <MenuItem value="checks">Courant</MenuItem>
         <MenuItem value="savings">Épargne</MenuItem>
-        <MenuItem value="deferredDebitCreditCard">CB différé</MenuItem>
+        <MenuItem value="deferredCard">CB différé</MenuItem>
     </Select>;
 }
