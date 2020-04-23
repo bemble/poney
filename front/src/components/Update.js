@@ -4,6 +4,7 @@ import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles(theme => ({
     root: {
+        bottom: `calc(8px + env(safe-area-inset-bottom))`,
         "& > *": {
             background: theme.palette.background.paper,
             color: theme.palette.text.primary
