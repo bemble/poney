@@ -40,7 +40,7 @@ export default React.memo((props) => {
             e.categories = (e.categories || "").split('|').filter(e => !!e.trim().length);
         }
         return e;
-    }), createLine()];
+    })];
 
     const classes = useStyles();
     const [lines, setLines] = useState(initialLines);

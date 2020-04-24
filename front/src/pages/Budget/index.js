@@ -1,14 +1,28 @@
 import React, {useEffect, useState} from 'react';
-import {Paper, Tab, Tabs} from "@material-ui/core";
+import {Fab, Paper, Tab, Tabs} from "@material-ui/core";
 import Title from "../../components/Title";
 import Loading from "../../components/Loading";
 import BudgetTable from "./BudgetTable";
 import Header from "./Header";
 import store from "./Store";
 import Api from "../../core/Api";
-import EditDialog from "./BudgetLine/EditDialog";
+import EditDialog from "./EditDialog";
+import {Add as AddIcon} from "@material-ui/icons";
+import {makeStyles} from "@material-ui/core/styles";
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        marginBottom: 64
+    },
+    fab: {
+        position: 'fixed',
+        bottom: `calc(64px + ${theme.spacing(2)}px + env(safe-area-inset-bottom))`,
+        right: theme.spacing(2),
+    },
+}));
 
 export default function Budget(props) {
+    const [idBudget, setIdBudget] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [budget, setBudget] = useState(null);
     const [lines, setLines] = useState([]);
@@ -18,7 +32,7 @@ export default function Budget(props) {
     const [displayDialog, setDisplayDialog] = useState(false);
 
     const load = async (id) => {
-        id = id || store.getState().idBudget;
+        id = id || idBudget || store.getState().idBudget;
 
         setIsLoading(true);
         setBudget(await Api.get(`budget`, id));
@@ -30,6 +44,7 @@ export default function Budget(props) {
     useEffect(() => {
         const {id} = props.match.params;
         store.setBudget(id);
+        setIdBudget(id);
         load(id);
     }, []);
 
@@ -41,10 +56,11 @@ export default function Budget(props) {
         }
     };
 
+    const classes = useStyles();
     return <div>
         <Title>{budget ? budget.label : 'Budget'}</Title>
         {isLoading ? <Loading/> : null}
-        {!isLoading ? <div>
+        {!isLoading ? <div className={classes.root}>
             <Header/>
             <Tabs
                 value={currentPanel}
@@ -58,14 +74,19 @@ export default function Budget(props) {
             </Tabs>
             <Paper hidden={currentPanel !== 0}>
                 <BudgetTable budgetId={props.match.params.id} lines={lines.filter(d => !d.isIncome)}
-                             onEditLine={(line) => console.log(line) || setEdit(line)}/>
+                             onEditLine={(line) => setEdit(line)}/>
             </Paper>
             <Paper hidden={currentPanel !== 1}>
                 <BudgetTable budgetId={props.match.params.id} isIncome={true}
                              lines={lines.filter(d => !!d.isIncome)}
-                             onEditLine={(line) => console.log(line) || setEdit(line)}/>
+                             onEditLine={(line) => setEdit(line)}/>
             </Paper>
-            {displayDialog || edit ? <EditDialog onClose={(saved) => handleClose(saved)} {...edit}/> : null}
+            <Fab aria-label="Ajouter une nouvelle ligne" className={classes.fab} color="primary"
+                 onClick={() => setDisplayDialog(true)}>
+                <AddIcon/>
+            </Fab>
+            {displayDialog || edit ? <EditDialog onClose={(saved) => handleClose(saved)} {...edit} idBudget={idBudget}
+                                                 isIncome={currentPanel === 1}/> : null}
         </div> : null}
     </div>;
 };

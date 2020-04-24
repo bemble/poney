@@ -6,7 +6,6 @@ import {
 import React, {useState} from "react";
 import {grey} from "@material-ui/core/colors";
 import Tools from "./Tools";
-import LineInput from "./LineInput";
 
 import {operationKinds} from "./core";
 
@@ -60,19 +59,18 @@ export default React.memo((props) => {
     };
     return <TableRow hover className={classes.root}>
         <TableCell size="small">
-            <LineInput value={props.label} id={id} name={"label"} onCreated={onCreated}/><br/>
+            <span>{props.label}</span><br/>
             <span className={classes.sub}>
                 <span className={classes.color} style={{backgroundColor: color}}/>
                 {props.categories.join(', ')}
             </span>
         </TableCell>
         <TableCell size="small" align="right">
-            <LineInput value={props.amount} id={id} name={"amount"} number={true} isIncome={!!props.isIncome}
-                       alignRight={true} onCreated={onCreated}/><br/>
+            <span>{props.amount}</span><br/>
             <span className={classes.sub}>{getOperationKindLabel(props.operationKind)}</span>
         </TableCell>
-        <TableCell size="small">
-            <LineInput value={props.dayOfMonth} id={id} name={"dayOfMonth"} alignRight={true} onCreated={onCreated}/>
+        <TableCell size="small" align="right">
+            <span>{props.dayOfMonth}</span>
         </TableCell>
         <TableCell size="small" style={{verticalAlign: "middle"}}>
             <Tools {...{...props, id, initialId: id}} onColorChanged={(hex) => setColor(hex)}/>
