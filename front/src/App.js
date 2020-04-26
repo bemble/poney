@@ -50,7 +50,6 @@ export default React.memo(() => {
     const [isSignedId, setIsSignedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const [showUpdateAvailable, setShowUpdateAvailable] = useState(false);
 
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const theme = React.useMemo(
@@ -71,14 +70,12 @@ export default React.memo(() => {
 
     useEffect(() => {
         store.subscribe(() => {
-            const {token, hasUpdate} = store.getState();
+            const {token} = store.getState();
             if (token && !isSignedId) {
                 setIsSignedIn(true);
             } else if (!token && isSignedId) {
                 setIsSignedIn(false);
             }
-
-            setShowUpdateAvailable(hasUpdate);
         });
 
         (async () => {
@@ -130,7 +127,7 @@ export default React.memo(() => {
                         <AppBar links={links} secondaryLinks={secondaryLinks}/>
                     </div>}
             </div>}
-            <Update open={showUpdateAvailable} />
+            <Update />
         </ThemeProvider>
     </Router>;
 });

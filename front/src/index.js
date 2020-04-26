@@ -4,8 +4,7 @@ import './index.css';
 import '../node_modules/react-vis/dist/style.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-
-import store from "./AppStore";
+import store from "./UpdateStore";
 
 const updateVh = () => {
     let vh = window.innerHeight * 0.01;
@@ -15,4 +14,8 @@ window.addEventListener('resize', updateVh);
 updateVh();
 
 ReactDOM.render(<App/>, document.getElementById('root'));
-serviceWorker.register({onUpdate: () => store.setHasUpdate(true)});
+
+serviceWorker.register({
+    onSuccess: () => store.dispatch({type: "SW_INIT"}),
+    onUpdate: reg => store.dispatch({type: "SW_UPDATE", payload: reg}),
+});

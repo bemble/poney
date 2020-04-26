@@ -2,7 +2,6 @@ import {createStore} from 'redux';
 
 const initialState = {
     token: "",
-    hasUpdate: false,
     config: {}
 };
 
@@ -20,9 +19,6 @@ function appReducer(state = initialState, action) {
 const store = createStore(appReducer);
 store.setToken = (token) => {
     store.dispatch({type: "SET", token});
-};
-store.setHasUpdate = (hasUpdate) => {
-    store.dispatch({type: "SET", hasUpdate});
 };
 
 export default store;
