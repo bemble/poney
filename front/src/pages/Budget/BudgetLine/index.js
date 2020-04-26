@@ -58,18 +58,18 @@ export default React.memo((props) => {
         return elt ? elt.label : "";
     };
     return <TableRow hover className={classes.root}>
-        <TableCell size="small">
+        <TableCell size="small" onClick={() => props.onEdit && props.onEdit()}>
             <span>{props.label}</span><br/>
             <span className={classes.sub}>
                 <span className={classes.color} style={{backgroundColor: color}}/>
                 {props.categories.join(', ')}
             </span>
         </TableCell>
-        <TableCell size="small" align="right">
+        <TableCell size="small" align="right" onClick={() => props.onEdit && props.onEdit()}>
             <span>{props.amount}</span><br/>
             <span className={classes.sub}>{getOperationKindLabel(props.operationKind)}</span>
         </TableCell>
-        <TableCell size="small" align="right">
+        <TableCell size="small" align="right" onClick={() => props.onEdit && props.onEdit()}>
             <span>{props.dayOfMonth}</span>
         </TableCell>
         <TableCell size="small" style={{verticalAlign: "middle"}}>

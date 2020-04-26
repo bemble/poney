@@ -14,6 +14,11 @@ import {makeStyles} from "@material-ui/core/styles";
 import {Link} from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({
+    dialog: {
+        "& .MuiPaper-root.MuiDialog-paper": {
+            paddingBottom: `env(safe-area-inset-bottom)`
+        }
+    },
     dialogTitle: {
         [theme.breakpoints.down("sm")]: {
             color: theme.palette.primary.contrastText,
@@ -48,7 +53,7 @@ export default React.memo((props) => {
     const classes = useStyles();
 
     return <Dialog open={true} fullScreen={fullScreen} onClose={() => handleClose()}
-                   aria-labelledby="form-dialog-title">
+                   aria-labelledby="form-dialog-title" className={classes.dialog}>
         <DialogTitle className={classes.dialogTitle}
                      id="form-dialog-title">{isEdit ? "Editer le budget" : "Créer un budget"}
         </DialogTitle>
