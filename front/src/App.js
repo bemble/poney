@@ -5,6 +5,7 @@ import {
     Configuration,
     Budgets,
     Budget,
+    BudgetView,
     Projects,
     Project,
     ProjectRecap,
@@ -121,13 +122,14 @@ export default React.memo(() => {
                             <Route path="/projets/:id/ajout-depense" exact component={Projects}/>
                             <Route path="/budgets" exact component={Budgets}/>
                             <Route path="/budgets/:id" exact component={Budget}/>
+                            <Route path="/budgets/:id/view" exact component={BudgetView}/>
                             <Route path="/suivi" component={Monitoring}/>
                             <Route path="/configuration" component={Configuration}/>
                         </main>
                         <AppBar links={links} secondaryLinks={secondaryLinks}/>
                     </div>}
             </div>}
-            <Update />
+            <Update/>
         </ThemeProvider>
     </Router>;
 });

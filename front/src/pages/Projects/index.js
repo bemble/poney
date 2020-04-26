@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
-    Fab, makeStyles, Switch, FormControlLabel
+    Fab, Paper, makeStyles, Switch, FormControlLabel
 } from "@material-ui/core";
 import {Add as AddIcon} from "@material-ui/icons";
 import TopRightLoading from "../../components/TopRightLoading";
@@ -80,7 +80,8 @@ export default React.memo(() => {
                               label="Afficher les projets cachés"/>
         </div> : null}
         {!isLoading && data ?
-            <List lines={data.filter(l => showHidden || !l.hidden)} onEdit={setEdit} onDelete={handleDelete}/> : null}
+            <Paper><List lines={data.filter(l => showHidden || !l.hidden)} onEdit={setEdit}
+                         onDelete={handleDelete}/></Paper> : null}
         {displayDialog || edit ? <EditDialog onClose={(saved) => handleClose(saved)} {...edit}/> : null}
         <AddExpense projectId={addExpenseProjectId} onClose={handleAddExpenseClose}/>
         <Fab aria-label="Créer un nouveau projet" className={classes.fab} color="primary"

@@ -6,7 +6,7 @@ import {
     TableBody,
     TableRow,
     TableCell,
-    Fab,
+    Fab, Paper,
     IconButton, Switch
 } from "@material-ui/core";
 import {Link} from 'react-router-dom';
@@ -93,7 +93,7 @@ class Budgets extends React.PureComponent {
         return <div>
             <TopRightLoading visible={innerLoading}/>
             {isLoading ? <Loading/> : null}
-            {!isLoading && data ? <Table className={classes.root}>
+            {!isLoading && data ? <Paper><Table className={classes.root}>
                 <TableHead>
                     <TableRow>
                         <TableCell className={classes.inUse}>Courant</TableCell>
@@ -107,7 +107,7 @@ class Budgets extends React.PureComponent {
                             <Switch onChange={() => this.handleChangeUse(line.id)} checked={!!line.inUse}/>
                         </TableCell>
                         <TableCell>
-                            <Link to={`/budgets/${line.id}`} className={classes.link}>
+                            <Link to={`/budgets/${line.id}/view`} className={classes.link}>
                                 {line.label}<br/>
                                 <span className={classes.date}>{(new Date(line.addedAt * 1000).toLocaleString())}</span>
                             </Link>
@@ -128,7 +128,7 @@ class Budgets extends React.PureComponent {
                         </TableCell>
                     </TableRow>)}
                 </TableBody>
-            </Table> : null}
+            </Table></Paper> : null}
             {displayDialog || edit ? <EditDialog onClose={(saved) => this.handleClose(saved)}
                                                  inUse={data.filter(e => !!e.inUse).length === 0} id={edit && edit.id}
                                                  label={edit && edit.label}/> : null}
