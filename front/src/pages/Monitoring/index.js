@@ -61,6 +61,9 @@ const styles = theme => ({
         position: "sticky",
         background: `radial-gradient(circle farthest-corner at top left, ${indigo[700]} 0%, ${blue[700]} 57%)`,
     },
+    table: {
+        marginBottom: `env(safe-area-inset-bottom)`
+    },
     credit: {
         color: green[500],
         fontWeight: 'bold'
@@ -193,7 +196,7 @@ class Suivi extends React.PureComponent {
                         <Typography variant="h6" className={classes.title}>Détails</Typography>
                     </Toolbar>
                 </AppBar>
-                <Table size="small">
+                <Table size="small" className={classes.table}>
                     <TableHead>
                         <TableRow>
                             <TableCell>Libelle</TableCell>
@@ -210,7 +213,7 @@ class Suivi extends React.PureComponent {
                             <TableCell className={classes.debit} align="right">{formatNumber(line.amount)}</TableCell>
                         </TableRow>)}
                         {details.deferredCard.map((line, i) => <TableRow hover
-                                                                                    key={`deferredCard-${i}`}>
+                                                                         key={`deferredCard-${i}`}>
                             <TableCell className={classes.deferredCard}>{line.label}</TableCell>
                             <TableCell className={classes.deferredCard}
                                        align="right">{formatNumber(line.amount)}</TableCell>

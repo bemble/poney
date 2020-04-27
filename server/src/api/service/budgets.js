@@ -15,8 +15,12 @@ router.get('/totals/:id', async (req, res) => {
     res.json(await Budgets.getTotals(req.params.id));
 });
 
+router.get('/usage/details/:id*?', async (req, res) => {
+    res.json(await Budgets.getUsageDetails(req.params.id, req.query.category, req.query.month));
+});
+
 router.get('/usage/:id*?', async (req, res) => {
-    res.json(await Budgets.getUsage(req.params.id));
+    res.json(await Budgets.getUsage(req.params.id, req.query.month));
 });
 
 module.exports = router;
@@ -65,7 +69,7 @@ class Budgets {
                        WHERE idBudget = ?`, [stmt.lastID, currentTimestamp, currentTimestamp, id]);
     }
 
-    static async getUsage(id) {
+    static async getUsage(id, month = null) {
         const db = await Database;
         if (!id) {
             id = (await db.get(`SELECT id
@@ -90,11 +94,11 @@ class Budgets {
         });
         categories.off = {expected: 0, total: 0, calendar: [], isIncome: false};
 
-        const from = moment().startOf('month');
-        let to = moment().endOf('month');
+        const from = moment.utc(month ? `${month}-01` : undefined).startOf('month');
+        let to = moment.utc(month ? `${month}-01` : undefined).endOf('month');
 
-        if (from.unix() === moment().startOf('month').unix() && to.unix() > moment().unix()) {
-            to = moment();
+        if (from.unix() === moment.utc().startOf('month').unix() && to.unix() > moment.utc().unix()) {
+            to = moment.utc();
         }
 
         const conditions = await Accounts.conditions();
@@ -129,5 +133,69 @@ class Budgets {
         });
 
         return categories;
+    }
+
+    static async getUsageDetails(id, category, month = null) {
+        const db = await Database;
+
+        if (category === "Sans catégorie Linxo") {
+            category = "";
+        }
+
+        if (!id) {
+            id = (await db.get(`SELECT id
+                                FROM budget
+                                WHERE inUse = ?`, [1])).id;
+        }
+
+        let budgetCategories = [];
+        const budgetLines = (await db.all(`SELECT *
+                                           FROM budgetLine
+                                           WHERE idBudget = ?`, [id]))
+            .map(l => {
+                if(l.categories.length) {
+                    budgetCategories.push(l.categories);
+                }
+                l.categories = (l.categories || "").split('|');
+
+                if (!l.isIncome) {
+                    l.amount = -l.amount;
+                }
+                return l;
+            }).filter(l => l.categories.indexOf(category) !== -1);
+        budgetCategories = budgetCategories.join("|").split("|").filter((value, index, self) => self.indexOf(value) === index);
+
+        const from = moment.utc(month ? `${month}-01` : undefined).startOf('month');
+        let to = moment.utc(month ? `${month}-01` : undefined).endOf('month');
+
+        if (from.unix() === moment.utc().startOf('month').unix() && to.unix() > moment.utc().unix()) {
+            to = moment.utc();
+        }
+
+        const conditions = await Accounts.conditions();
+
+        const conditionDeferredCard = conditions.deferredCard ? `OR (${conditions.deferredCard.join(' OR ')})` : "";
+        let data = [];
+
+        if(category === "off") {
+            data = (await db.all(`SELECT *
+                                      FROM rawData
+                                      WHERE date BETWEEN ? AND ?
+                                        AND category NOT IN (${budgetCategories.map(() => "?").join(', ')})
+                                        AND (${conditions.checks.join(' OR ')}
+                                        ${conditionDeferredCard})
+                                      ORDER BY date DESC`, [from.unix(), to.unix(), ...budgetCategories])).filter(d => d.total !== 0);
+        }
+        else {
+            data = (await db.all(`SELECT *
+                                      FROM rawData
+                                      WHERE date BETWEEN ? AND ?
+                                        AND category = ?
+                                        AND (${conditions.checks.join(' OR ')}
+                                        ${conditionDeferredCard})
+                                      ORDER BY date DESC`, [from.unix(), to.unix(), category])).filter(d => d.total !== 0);
+        }
+
+        return {budgetLines, data};
     }
 }
