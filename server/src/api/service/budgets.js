@@ -107,9 +107,10 @@ class Budgets {
         const rawData = (await db.all(`SELECT category, SUM(amount) AS total
                                       FROM rawData
                                       WHERE date BETWEEN ? AND ?
+                                        AND category NOT IN (?)
                                         AND (${conditions.checks.join(' OR ')}
                                         ${conditionDeferredCard})
-                                        GROUP BY category`, [from.unix(), to.unix()])).filter(d => d.total !== 0);
+                                        GROUP BY category`, [from.unix(), to.unix(), "Prél. carte débit différé"])).filter(d => d.total !== 0);
         rawData.forEach(d => {
             if (categories[d.category] !== undefined) {
                 categories[d.category].total += d.total;
@@ -122,8 +123,10 @@ class Budgets {
             const currentExpected = categories[k].calendar
                 .filter(e => e.dayOfMonth <= to.date())
                 .reduce((a, e) => a + e.amount, 0);
-            categories[k].hasWarning = (!categories[k].isIncome && currentExpected - categories[k].total > 1)
-                || (categories[k].isIncome && categories[k].total - currentExpected < 1);
+
+            categories[k].isLightWarning = !categories[k].isIncome && (currentExpected !== 0 && categories[k].total === 0);
+            categories[k].hasWarning = (!categories[k].isIncome && ((currentExpected - categories[k].total > 1) || categories[k].isLightWarning))
+                || (categories[k].isIncome && currentExpected > 0 && categories[k].total - currentExpected < 1);
 
             categories[k].displayCalendar = categories[k].calendar
                 .map(e => e.dayOfMonth)
@@ -153,7 +156,7 @@ class Budgets {
                                            FROM budgetLine
                                            WHERE idBudget = ?`, [id]))
             .map(l => {
-                if(l.categories.length) {
+                if (l.categories.length) {
                     budgetCategories.push(l.categories);
                 }
                 l.categories = (l.categories || "").split('|');
@@ -177,7 +180,8 @@ class Budgets {
         const conditionDeferredCard = conditions.deferredCard ? `OR (${conditions.deferredCard.join(' OR ')})` : "";
         let data = [];
 
-        if(category === "off") {
+        if (category === "off") {
+            budgetCategories.push("Prél. carte débit différé");
             data = (await db.all(`SELECT *
                                       FROM rawData
                                       WHERE date BETWEEN ? AND ?
@@ -185,8 +189,7 @@ class Budgets {
                                         AND (${conditions.checks.join(' OR ')}
                                         ${conditionDeferredCard})
                                       ORDER BY date DESC`, [from.unix(), to.unix(), ...budgetCategories])).filter(d => d.total !== 0);
-        }
-        else {
+        } else {
             data = (await db.all(`SELECT *
                                       FROM rawData
                                       WHERE date BETWEEN ? AND ?

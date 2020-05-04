@@ -15,15 +15,25 @@ import {makeStyles} from "@material-ui/core/styles";
 
 import Api from "../../core/Api";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCalendarAlt, faCheckCircle, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import {
+    faCalendarAlt,
+    faCheckCircle,
+    faExclamationCircle,
+    faExclamationTriangle,
+    faTag
+} from "@fortawesome/free-solid-svg-icons";
 import {formatNumber} from "../../core/Tools";
 import {Close as CloseIcon} from "@material-ui/icons";
-import {amber, blue, green, indigo} from "@material-ui/core/colors";
+import {blue, indigo} from "@material-ui/core/colors";
 
 const useStyles = makeStyles(theme => ({
     warningIcon: {
-        marginRight: theme.spacing(2),
+        marginRight: theme.spacing(),
         color: theme.palette.warning.light
+    },
+    lightWarningIcon: {
+        marginRight: theme.spacing(),
+        color: theme.palette.text.hint
     },
     noWarning: {
         fontSize: 12,
@@ -77,6 +87,14 @@ const useStyles = makeStyles(theme => ({
         "& svg": {
             marginRight: theme.spacing()
         }
+    },
+    dataCategory: {
+        fontSize: 12,
+        color: theme.palette.info.light,
+        "& svg": {
+            marginLeft: theme.spacing(2),
+            marginRight: theme.spacing()
+        }
     }
 }));
 
@@ -100,7 +118,7 @@ export default React.memo((props) => {
             const apiUsage = await Api.service(path, {}, queryParams);
             const newUsage = {};
             Object.keys(apiUsage).forEach(k => {
-                if ((props.onlyWarnings && apiUsage[k].hasWarning) || !props.onlyWarnings) {
+                if ((props.onlyWarnings && apiUsage[k].hasWarning && !apiUsage[k].isLightWarning) || !props.onlyWarnings) {
                     newUsage[k] = apiUsage[k];
                 }
             });
@@ -134,8 +152,10 @@ export default React.memo((props) => {
         <TableBody>
             {Object.keys(usage).map(k => <TableRow key={k} className={k === "off" ? classes.off : ""}>
                 <TableCell onClick={() => showDetails(k)}>
-                    {usage[k].hasWarning ?
+                    {usage[k].hasWarning && !usage[k].isLightWarning ?
                         <FontAwesomeIcon icon={faExclamationTriangle} className={classes.warningIcon}/> : null}
+                    {usage[k].hasWarning && usage[k].isLightWarning ?
+                        <FontAwesomeIcon icon={faExclamationCircle} className={classes.lightWarningIcon}/> : null}
                     <span
                         className={usage[k].isIncome ? classes.income : ""}>{k === "off" ? "Hors budget" : k}</span> : {formatNumber(usage[k].total)}
                     <span className={classes.expected}>/{formatNumber(usage[k].expected)}</span><br/>
@@ -183,6 +203,10 @@ export default React.memo((props) => {
                             <span className={classes.dataCalendar}>
                                 <FontAwesomeIcon icon={faCalendarAlt}/>
                                 {moment.unix(line.date).format("DD/MM")}
+                            </span>
+                            <span className={classes.dataCategory}>
+                                <FontAwesomeIcon icon={faTag}/>
+                                {line.category}
                             </span>
                         </TableCell>
                         <TableCell className={classes.data} align="right">{formatNumber(line.amount)}</TableCell>

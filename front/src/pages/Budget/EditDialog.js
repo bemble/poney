@@ -52,6 +52,10 @@ const useStyles = makeStyles(theme => ({
     item: {
         marginBottom: theme.spacing(4)
     },
+    parentCategory: {
+        paddingLeft: theme.spacing(),
+        borderBottom: `1px solid ${theme.palette.primary.main}`
+    },
     picker: {
         width: '100%',
         background: `${theme.palette.background.default} !important`,
@@ -146,9 +150,8 @@ export default React.memo((props) => {
                         >
                             {linxoCategories.map(({label, isParent}, i) => <MenuItem key={label + i}
                                                                                      value={label}
-                                                                                     disabled={!!isParent}
                                                                                      className={isParent ? classes.parentCategory : ""}>
-                                {!isParent ? <Checkbox checked={(categories || []).indexOf(label) > -1}/> : null}
+                                <Checkbox checked={(categories || []).indexOf(label) > -1}/>
                                 <ListItemText primary={label}/>
                             </MenuItem>)}
                         </Select>

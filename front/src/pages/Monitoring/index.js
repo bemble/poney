@@ -20,7 +20,7 @@ import moment from 'moment';
 import {Search as SearchIcon, Close as CloseIcon} from "@material-ui/icons";
 import Api from "../../core/Api";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCreditCard, faLongArrowAltDown, faLongArrowAltUp} from "@fortawesome/free-solid-svg-icons";
+import {faCreditCard, faLongArrowAltDown, faLongArrowAltUp, faTag} from "@fortawesome/free-solid-svg-icons";
 
 const styles = theme => ({
     tools: {
@@ -82,6 +82,13 @@ const styles = theme => ({
             padding: "2px 6px",
             margin: "0 2px",
             borderRadius: 12
+        }
+    },
+    dataCategory: {
+        fontSize: 12,
+        color: theme.palette.text.hint,
+        "& svg": {
+            marginRight: theme.spacing()
         }
     },
     detailsIn: {
@@ -193,7 +200,8 @@ class Suivi extends React.PureComponent {
                         <IconButton edge="start" color="inherit" aria-label="close" onClick={closeDetails}>
                             <CloseIcon/>
                         </IconButton>
-                        <Typography variant="h6" className={classes.title}>Détails</Typography>
+                        <Typography variant="h6" className={classes.title}>Détails,
+                            le {details ? moment.unix(details.date).format("DD/MM/YYYY") : null}</Typography>
                     </Toolbar>
                 </AppBar>
                 <Table size="small" className={classes.table}>
@@ -205,16 +213,34 @@ class Suivi extends React.PureComponent {
                     </TableHead>
                     {details ? <TableBody>
                         {details.credits.map((line, i) => <TableRow hover key={`credit-${i}`}>
-                            <TableCell className={classes.credit}>{line.label}</TableCell>
+                            <TableCell className={classes.credit}>
+                                {line.label}<br/>
+                                <span className={classes.dataCategory}>
+                                <FontAwesomeIcon icon={faTag}/>
+                                    {line.category}
+                            </span>
+                            </TableCell>
                             <TableCell className={classes.credit} align="right">{formatNumber(line.amount)}</TableCell>
                         </TableRow>)}
                         {details.debits.map((line, i) => <TableRow hover key={`debit-${i}`}>
-                            <TableCell className={classes.debit}>{line.label}</TableCell>
+                            <TableCell className={classes.debit}>
+                                {line.label}<br/>
+                                <span className={classes.dataCategory}>
+                                    <FontAwesomeIcon icon={faTag}/>
+                                    {line.category}
+                                </span>
+                            </TableCell>
                             <TableCell className={classes.debit} align="right">{formatNumber(line.amount)}</TableCell>
                         </TableRow>)}
                         {details.deferredCard.map((line, i) => <TableRow hover
                                                                          key={`deferredCard-${i}`}>
-                            <TableCell className={classes.deferredCard}>{line.label}</TableCell>
+                            <TableCell className={classes.deferredCard}>
+                                {line.label}<br/>
+                                <span className={classes.dataCategory}>
+                                    <FontAwesomeIcon icon={faTag}/>
+                                    {line.category}
+                                </span>
+                            </TableCell>
                             <TableCell className={classes.deferredCard}
                                        align="right">{formatNumber(line.amount)}</TableCell>
                         </TableRow>)}
