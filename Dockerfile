@@ -20,7 +20,12 @@ RUN npm run build
 RUN rm -rf src node_modules public .git .gitignore README.md
 
 WORKDIR /usr/src/app/server
-RUN npm install --no-dev
+
+RUN apk --no-cache add --virtual native-deps \
+  g++ gcc libgcc libstdc++ linux-headers make python && \
+  npm install --quiet node-gyp -g &&\
+  npm install --no-dev --quiet && \
+  apk del native-deps
 
 ENV PORT 3100
 EXPOSE 3100
