@@ -5,15 +5,19 @@ import {
     TableBody,
     TableCell,
     TableHead,
-    TableRow,
+    TableRow, IconButton
 } from "@material-ui/core";
 import BudgetLine from "./BudgetLine";
 import store from "./Store";
+import {faExchangeAlt} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Api from "../../core/Api";
 
 const useStyles = makeStyles(theme => ({
     tools: {
         width: "60px !important",
-        minWidth: "60px !important"
+        minWidth: "60px !important",
+        textAlign: "right"
     },
     amount: {
         width: 70,
@@ -44,6 +48,7 @@ export default React.memo((props) => {
 
     const classes = useStyles();
     const [lines, setLines] = useState(initialLines);
+    const [isReordering, setIsReordering] = useState(false);
 
     const handleOnDeleted = async (id) => {
         const index = lines.findIndex(l => l.id === id);
@@ -70,19 +75,49 @@ export default React.memo((props) => {
         }
     };
 
+    const handleToggleOrder = () => {
+        setIsReordering(!isReordering);
+    };
+
+    const handleOnUpClicked = (id) => {
+        const curIndex = lines.findIndex(e => e.id === id);
+        const newLines = [...lines];
+        newLines[curIndex - 1] = lines[curIndex];
+        newLines[curIndex] = lines[curIndex - 1];
+        const newOrder = newLines.map(e => e.id);
+        Api.service(`budgets/reorder/${props.budgetId}`, {body: newOrder});
+        setLines(newLines);
+    };
+    const handleOnDownClicked = (id) => {
+        const curIndex = lines.findIndex(e => e.id === id);
+        const newLines = [...lines];
+        newLines[curIndex + 1] = lines[curIndex];
+        newLines[curIndex] = lines[curIndex + 1];
+        const newOrder = newLines.map(e => e.id);
+        Api.service(`budgets/reorder/${props.budgetId}`, {method: "POST", body: newOrder});
+        setLines(newLines);
+    };
+
     return <Table>
         <TableHead>
             <TableRow>
                 <TableCell>Libelle</TableCell>
                 <TableCell className={classes.amount}>Montant</TableCell>
                 <TableCell className={classes.dayOfMonth}>Jour</TableCell>
-                <TableCell className={classes.tools}/>
+                <TableCell className={classes.tools}>
+                    <IconButton aria-label="Supprimer" onClick={() => handleToggleOrder()} size="small"
+                                color={isReordering ? "primary" : "default"}>
+                        <FontAwesomeIcon icon={faExchangeAlt} rotation={90}/>
+                    </IconButton>
+                </TableCell>
             </TableRow>
         </TableHead>
         <TableBody>
-            {lines.map((line) => <BudgetLine key={line.id} {...line} onDeleted={handleOnDeleted}
-                                             onCreated={handleOnCreated}
-                                             onEdit={() => props.onEditLine && props.onEditLine(line)}/>)}
+            {lines.map((line, i) => <BudgetLine key={line.id} {...line} isReordering={isReordering}
+                                                isLast={i === lines.length - 1} isFirst={i === 0}
+                                                onUpClicked={handleOnUpClicked} onDownClicked={handleOnDownClicked}
+                                                onDeleted={handleOnDeleted} onCreated={handleOnCreated}
+                                                onEdit={() => props.onEditLine && props.onEditLine(line)}/>)}
         </TableBody>
     </Table>;
 });

@@ -36,7 +36,7 @@ export default function Budget(props) {
 
         setIsLoading(true);
         setBudget(await Api.get(`budget`, id));
-        setLines(await Api.search(`budget_line`, {$where: {idBudget: id}}));
+        setLines(await Api.search(`budget_line`, {$where: {idBudget: id}, $orderBy:["order", "id"]}));
         await store.refreshFromDatabase(id);
         setIsLoading(false);
     };

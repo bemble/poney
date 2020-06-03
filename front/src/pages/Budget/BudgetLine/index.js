@@ -59,21 +59,21 @@ export default React.memo((props) => {
     };
     return <TableRow hover className={classes.root}>
         <TableCell size="small" onClick={() => props.onEdit && props.onEdit()}>
-            <span>{props.label}</span><br/>
-            <span className={classes.sub}>
+            <span>{props.isReordering ? <span className={classes.color} style={{backgroundColor: color}}/> : null} {props.label}</span><br/>
+            {props.isReordering ? null : <span className={classes.sub}>
                 <span className={classes.color} style={{backgroundColor: color}}/>
                 {props.categories.join(', ')}
-            </span>
+            </span>}
         </TableCell>
         <TableCell size="small" align="right" onClick={() => props.onEdit && props.onEdit()}>
             <span>{props.amount}</span><br/>
-            <span className={classes.sub}>{getOperationKindLabel(props.operationKind)}</span>
+            {props.isReordering ? null : <span className={classes.sub}>{getOperationKindLabel(props.operationKind)}</span>}
         </TableCell>
         <TableCell size="small" align="right" onClick={() => props.onEdit && props.onEdit()}>
             <span>{props.dayOfMonth}</span>
         </TableCell>
         <TableCell size="small" style={{verticalAlign: "middle"}}>
-            <Tools {...{...props, id, initialId: id}} onColorChanged={(hex) => setColor(hex)}/>
+            <Tools {...{...props, id, initialId: id}} isReordering={props.isReordering} onColorChanged={(hex) => setColor(hex)}/>
         </TableCell>
     </TableRow>;
 });

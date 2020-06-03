@@ -11,6 +11,10 @@ router.post('/duplicate/:id', async (req, res) => {
     res.json(await Budgets.duplicate(req.params.id));
 });
 
+router.post('/reorder/:id', async (req, res) => {
+    res.json(await Budgets.reorder(req.params.id, req.body));
+});
+
 router.get('/totals/:id', async (req, res) => {
     res.json(await Budgets.getTotals(req.params.id));
 });
@@ -67,6 +71,19 @@ class Budgets {
                               ?
                        FROM budgetLine
                        WHERE idBudget = ?`, [stmt.lastID, currentTimestamp, currentTimestamp, id]);
+    }
+
+    static async reorder(id, newOrder) {
+        const db = await Database;
+        const currentTimestamp = Database.currentTimestamp();
+        await Promise.all(newOrder.map((id, i) => {
+            return db.run(`UPDATE budgetLine
+                           SET \`order\`=?,
+                               updatedAt=?
+                           WHERE id = ?`, [i, currentTimestamp, id]);
+        }));
+
+        return {message: "done"};
     }
 
     static async getUsage(id, month = null) {
