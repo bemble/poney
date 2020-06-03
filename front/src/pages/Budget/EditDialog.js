@@ -101,7 +101,7 @@ export default React.memo((props) => {
                 amount: newAmount,
                 operationKind,
                 categories: categories.join('|'),
-                order: 0,
+                order: props.order,
                 dayOfMonth: parseInt("" + dayOfMonth), color
             });
 

@@ -35,7 +35,8 @@ const createLine = (id = -1) => ({
     amount: "",
     operationKind: "",
     categories: [],
-    dayOfMonth: ""
+    dayOfMonth: "",
+    order: 0
 });
 
 export default React.memo((props) => {

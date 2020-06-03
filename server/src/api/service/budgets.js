@@ -80,7 +80,7 @@ class Budgets {
             return db.run(`UPDATE budgetLine
                            SET \`order\`=?,
                                updatedAt=?
-                           WHERE id = ?`, [i, currentTimestamp, id]);
+                           WHERE id = ?`, [i + 1, currentTimestamp, id]);
         }));
 
         return {message: "done"};
