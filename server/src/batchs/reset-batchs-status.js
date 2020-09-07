@@ -10,8 +10,9 @@ module.exports = async () => {
         await db.run(`UPDATE batchHistory
                       SET status = ?
                       WHERE 1 = 1`, [0]);
-        await db.run(`INSERT OR
-                      REPLACE INTO batchHistory
+
+        const exists = !!db.get("SELECT script FROM batchHistory WHERE script = ?", [SCRIPT_NAME]);
+        await db.run(`${!exists ? "INSERT" : "REPLACE"} INTO batchHistory
                         (script, status, message, lastRunnedAt)
                       VALUES
                         (?, ?, ?, ?)`, [SCRIPT_NAME, 0, null, Database.currentTimestamp()]);

@@ -14,12 +14,12 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.runSql("UPDATE accountSetting SET usedFor = 'deferredCard' WHERE usedFor = 'deferredDebitCreditCard'", callback);
+exports.up = async function (db) {
+    return db.runSql("UPDATE accountSetting SET usedFor = 'deferredCard' WHERE usedFor = 'deferredDebitCreditCard'");
 };
 
-exports.down = function (db, callback) {
-    db.runSql("UPDATE accountSetting SET usedFor = 'deferredDebitCreditCard' WHERE usedFor = 'deferredCard'", callback);
+exports.down = async function (db) {
+    return db.runSql("UPDATE accountSetting SET usedFor = 'deferredDebitCreditCard' WHERE usedFor = 'deferredCard'");
 };
 
 exports._meta = {

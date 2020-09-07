@@ -14,16 +14,16 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.runSql("UPDATE accountSetting SET usedFor = 'checks' WHERE usedFor = 'courant'");
-    db.runSql("UPDATE accountSetting SET usedFor = 'savings' WHERE usedFor = 'epargne'");
-    db.runSql("UPDATE accountSetting SET usedFor = 'deferredDebitCreditCard' WHERE usedFor = 'cbDiff'", callback);
+exports.up = async function (db) {
+    await db.runSql("UPDATE accountSetting SET usedFor = 'checks' WHERE usedFor = 'courant'");
+    await db.runSql("UPDATE accountSetting SET usedFor = 'savings' WHERE usedFor = 'epargne'");
+    await db.runSql("UPDATE accountSetting SET usedFor = 'deferredDebitCreditCard' WHERE usedFor = 'cbDiff'");
 };
 
-exports.down = function (db, callback) {
-    db.runSql("UPDATE accountSetting SET usedFor = 'courant' WHERE usedFor = 'checks'");
-    db.runSql("UPDATE accountSetting SET usedFor = 'epargne' WHERE usedFor = 'savings'");
-    db.runSql("UPDATE accountSetting SET usedFor = 'cbDiff' WHERE usedFor = 'deferredDebitCreditCard'", callback);
+exports.down = async function (db) {
+    await db.runSql("UPDATE accountSetting SET usedFor = 'courant' WHERE usedFor = 'checks'");
+    await db.runSql("UPDATE accountSetting SET usedFor = 'epargne' WHERE usedFor = 'savings'");
+    await db.runSql("UPDATE accountSetting SET usedFor = 'cbDiff' WHERE usedFor = 'deferredDebitCreditCard'");
 };
 
 exports._meta = {

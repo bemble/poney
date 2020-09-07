@@ -20,8 +20,9 @@ module.exports = async () => {
     }
 
     console.log('Starting updating credit card calendar...');
-    await db.run(`INSERT OR
-                   REPLACE INTO batchHistory
+
+    const exists = !!db.get("SELECT script FROM batchHistory WHERE script = ?", [SCRIPT_NAME]);
+    await db.run(`${!exists ? "INSERT" : "REPLACE"} INTO batchHistory
                      (script, status, message, lastRunnedAt)
                    VALUES
                      (?, ?, ?, ?)`, [SCRIPT_NAME, 2, null, Database.currentTimestamp()]);
@@ -54,8 +55,7 @@ module.exports = async () => {
         await Promise.all(insertPromises);
     }
 
-    await db.run(`INSERT OR
-                   REPLACE INTO batchHistory
+    await db.run(`REPLACE INTO batchHistory
                      (script, status, message, lastRunnedAt)
                    VALUES
                      (?, ?, ?, ?)`, [SCRIPT_NAME, 0, null, Database.currentTimestamp()]);

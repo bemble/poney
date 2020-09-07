@@ -14,8 +14,8 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.createTable('savingLine', {
+exports.up = async function (db) {
+    await db.createTable('savingLine', {
         id: {type: 'int', primaryKey: true, autoIncrement: true, unsigned: true},
         month: {type: 'string'},
         idSaving: {
@@ -33,11 +33,11 @@ exports.up = function (db, callback) {
         comment: {type: 'text'},
         addedAt: 'timestamp',
         updatedAt: 'timestamp'
-    }, callback);
+    });
 };
 
-exports.down = function (db, callback) {
-    return db.dropTable('savingLine', callback);
+exports.down = async function (db) {
+    await db.dropTable('savingLine');
 };
 
 exports._meta = {

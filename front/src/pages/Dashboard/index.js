@@ -34,7 +34,7 @@ export default React.memo((props) => {
         const data = await Api.get(`batch_history`, `linxo-importer`, {field: 'script'});
         if (synchStatus === 2 && data.status !== synchStatus) {
             await Api.service(`/monitoring/totals`).then(({amount}) => setBalance(amount));
-            await Api.service(`/savings/totals`).then(({amount}) => setSavingsTotal(amount));
+            await Api.service(`/savings/totals`).then(({real}) => setSavingsTotal(real));
         }
         synchStatus = data.status;
         setLastSynch(data);

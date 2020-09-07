@@ -14,8 +14,8 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.createTable('projectLine', {
+exports.up = async function (db) {
+    await db.createTable('projectLine', {
         id: {type: 'int', primaryKey: true, autoIncrement: true, unsigned: true},
         idProject: {
             type: 'int', unsigned: true, notNull: true, foreignKey: {
@@ -34,11 +34,11 @@ exports.up = function (db, callback) {
         comment: {type: 'text'},
         addedAt: 'timestamp',
         updatedAt: 'timestamp'
-    }, callback);
+    });
 };
 
-exports.down = function (db, callback) {
-    return db.dropTable('projectLine', callback);
+exports.down = async function (db) {
+    await db.dropTable('projectLine');
 };
 
 exports._meta = {

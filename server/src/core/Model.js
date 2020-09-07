@@ -14,7 +14,7 @@ class Model {
 
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
         const db = await Database;
-        const rows = await db.all(query.sql, query.values);
+        const [rows] = await db.query(query.sql, query.values);
         return rows || [];
     }
 
@@ -28,14 +28,21 @@ class Model {
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
 
         const db = await Database;
-        const {lastID} = await db.run(query.sql, query.values);
-        if (!lastID) {
+        let lastInsertId = false;
+        if (Database.driverName === "sqlite3") {
+            const {lastID} = await db.run(query.sql, query.values);
+            lastInsertId = lastID;
+        } else if (Database.driverName === "mysql") {
+            const [{insertId}] = await db.execute(query.sql, query.values);
+            lastInsertId = insertId;
+        }
+        if (!lastInsertId) {
             return null;
         }
 
         return Model.getOne({
             $from: jsonQuery.$table,
-            $where: {id: lastID}
+            $where: {id: insertId}
         });
     }
 
@@ -47,7 +54,7 @@ class Model {
 
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
         const db = await Database;
-        await db.run(query.sql, query.values);
+        await db.execute(query.sql, query.values);
 
         return Model.getOne({
             $from: jsonQuery.$table,
@@ -59,7 +66,7 @@ class Model {
         const query = Database.builder.$delete(jsonQuery);
 
         const db = await Database;
-        return db.run(query.sql, query.values);
+        return db.execute(query.sql, query.values);
     }
 }
 

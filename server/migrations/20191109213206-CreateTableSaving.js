@@ -14,11 +14,11 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.createTable('saving', {
+exports.up = async function (db) {
+    await db.createTable('saving', {
         id: {type: 'int', primaryKey: true, autoIncrement: true, unsigned: true},
         idBudgetLine: {
-            type: 'int', unsigned: true, notNull: true, foreignKey: {
+            type: 'int', unsigned: true, notNull: false, foreignKey: {
                 name: 'saving_budgetLine_id_fk',
                 table: 'budgetLine',
                 rules: {
@@ -31,11 +31,11 @@ exports.up = function (db, callback) {
         color: 'string',
         addedAt: 'timestamp',
         updatedAt: 'timestamp'
-    }, callback);
+    });
 };
 
-exports.down = function (db, callback) {
-    return db.dropTable('saving', callback);
+exports.down = async function (db) {
+    await db.dropTable('saving');
 };
 
 exports._meta = {

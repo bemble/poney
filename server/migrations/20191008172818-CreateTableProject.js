@@ -14,19 +14,19 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.createTable('project', {
+exports.up = async function (db) {
+    await db.createTable('project', {
         id: {type: 'int', primaryKey: true, autoIncrement: true, unsigned: true},
         label: {type: 'string'},
         endAt: {type: 'timestamp'},
-        hidden: {type:'bool'},
+        hidden: {type: 'boolean'},
         addedAt: 'timestamp',
         updatedAt: 'timestamp'
-    }, callback);
+    });
 };
 
-exports.down = function (db, callback) {
-    return db.dropTable('project', callback);
+exports.down = async function (db) {
+    await db.dropTable('project');
 };
 
 exports._meta = {

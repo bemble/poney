@@ -14,8 +14,8 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.createTable('budgetLine', {
+exports.up = async function (db) {
+    await db.createTable('budgetLine', {
         id: {type: 'int', primaryKey: true, autoIncrement: true, unsigned: true},
         idBudget: {
             type: 'int', unsigned: true, notNull: true, foreignKey: {
@@ -37,11 +37,11 @@ exports.up = function (db, callback) {
         order: {type: 'int', unsigned: true},
         addedAt: 'timestamp',
         updatedAt: 'timestamp'
-    }, callback);
+    });
 };
 
-exports.down = function (db, callback) {
-    return db.dropTable('budgetLine', callback);
+exports.down = async function (db) {
+    await db.dropTable('budgetLine');
 };
 
 exports._meta = {

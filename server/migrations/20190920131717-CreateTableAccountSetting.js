@@ -5,28 +5,28 @@ var type;
 var seed;
 
 /**
-  * We receive the dbmigrate dependency from dbmigrate initially.
-  * This enables us to not have to rely on NODE_PATH.
-  */
-exports.setup = function(options, seedLink) {
-  dbm = options.dbmigrate;
-  type = dbm.dataType;
-  seed = seedLink;
+ * We receive the dbmigrate dependency from dbmigrate initially.
+ * This enables us to not have to rely on NODE_PATH.
+ */
+exports.setup = function (options, seedLink) {
+    dbm = options.dbmigrate;
+    type = dbm.dataType;
+    seed = seedLink;
 };
 
-exports.up = function(db, callback) {
-    db.createTable('accountSetting', {
+exports.up = async function (db) {
+    await db.createTable('accountSetting', {
         id: {type: 'string', primaryKey: true},
         accountName: {type: 'string'},
         connectionName: {type: 'string'},
         usedFor: {type: 'string'}
-    }, callback);
+    });
 };
 
-exports.down = function(db, callback) {
-    return db.dropTable('accountSetting', callback);
+exports.down = async function (db) {
+    await db.dropTable('accountSetting');
 };
 
 exports._meta = {
-  "version": 1
+    "version": 1
 };

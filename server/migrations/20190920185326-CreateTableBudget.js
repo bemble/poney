@@ -14,18 +14,18 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.createTable('budget', {
+exports.up = async function (db) {
+    await db.createTable('budget', {
         id: {type: 'int', primaryKey: true, autoIncrement: true, unsigned: true},
         label: {type: 'string'},
         inUse: {type: 'smallint', unsigned: true},
         addedAt: 'timestamp',
         updatedAt: 'timestamp'
-    }, callback);
+    });
 };
 
-exports.down = function (db, callback) {
-    return db.dropTable('budget', callback);
+exports.down = async function (db) {
+    await db.dropTable('budget');
 };
 
 exports._meta = {

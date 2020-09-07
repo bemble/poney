@@ -14,17 +14,17 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.createTable('batchHistory', {
+exports.up = async function (db) {
+    await db.createTable('batchHistory', {
         script: {type: 'string', primaryKey: true},
         status: {type: 'smallint', unsigned: true},
         message: 'text',
         lastRunnedAt: 'timestamp'
-    }, callback);
+    });
 };
 
-exports.down = function (db, callback) {
-    return db.dropTable('batchHistory', callback);
+exports.down = async function (db) {
+    await db.dropTable('batchHistory');
 };
 
 exports._meta = {

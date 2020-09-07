@@ -14,14 +14,14 @@ exports.setup = function (options, seedLink) {
     seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-    db.runSql("UPDATE budgetLine SET categories = \"Salaire/Revenus d'activité\" WHERE categories = \"Salaire / Revenus d'activité\"", callback);
-    db.runSql("UPDATE budgetLine SET categories = 'Shopping/e-Commerce' WHERE categories = 'Shopping / e - Commerce'", callback);
+exports.up = async function (db) {
+    await db.runSql("UPDATE budgetLine SET categories = \"Salaire/Revenus d'activité\" WHERE categories = \"Salaire / Revenus d'activité\"");
+    await db.runSql("UPDATE budgetLine SET categories = 'Shopping/e-Commerce' WHERE categories = 'Shopping / e - Commerce'");
 };
 
-exports.down = function (db, callback) {
-    db.runSql("UPDATE budgetLine SET categories = \"Salaire / Revenus d'activité\" WHERE categories = \"Salaire/Revenus d'activité\"", callback);
-    db.runSql("UPDATE budgetLine SET categories = \"Shopping / e - Commerce\" WHERE categories = \"Shopping/e-Commerce\"", callback);
+exports.down = async function (db) {
+    await db.runSql("UPDATE budgetLine SET categories = \"Salaire / Revenus d'activité\" WHERE categories = \"Salaire/Revenus d'activité\"");
+    await db.runSql("UPDATE budgetLine SET categories = \"Shopping / e - Commerce\" WHERE categories = \"Shopping/e-Commerce\"");
 };
 
 exports._meta = {

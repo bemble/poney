@@ -1,13 +1,10 @@
-const fs = require('fs');
-const puppeteer = require('puppeteer');
-const util = require('util');
 const sha1 = require("sha1");
 const moment = require("moment");
+const fetch = require("node-fetch");
+const fs = require('fs');
+var iconv = require('iconv-lite');
 
 const Database = require('../core/Database');
-
-const downloadPath = `/tmp`;
-const headless = true;
 
 const SCRIPT_NAME = "linxo-importer";
 
@@ -22,8 +19,8 @@ module.exports = async () => {
 
     console.log('Starting import data from Linxo...');
     try {
-        await db.run(`INSERT OR
-                      REPLACE INTO batchHistory
+        const exists = !!db.get("SELECT script FROM batchHistory WHERE script = ?", [SCRIPT_NAME]);
+        await db.run(`${!exists ? "INSERT" : "REPLACE"} INTO batchHistory
                         (script, status, message, lastRunnedAt)
                       VALUES
                         (?, ?, ?, ?)`, [SCRIPT_NAME, 2, null, Database.currentTimestamp()]);
@@ -41,8 +38,7 @@ module.exports = async () => {
             }
         }
 
-        await db.run(`INSERT OR
-                      REPLACE INTO batchHistory
+        await db.run(`REPLACE INTO batchHistory
                         (script, status, message, lastRunnedAt)
                       VALUES
                         (?, ?, ?, ?)`, [SCRIPT_NAME, hasError ? 1 : 0, hasError ? lastError : null, Database.currentTimestamp()]);
@@ -58,8 +54,8 @@ class LinxoImporter {
         await importer.getData();
     }
 
-    async importData(fileName) {
-        const lines = fs.readFileSync(fileName, {encoding: 'utf-16le'}).toString().split('\n').filter(Boolean);
+    async importData(rawCsvData) {
+        const lines = rawCsvData.split('\n').filter(Boolean);
         lines.shift();
         lines.reverse();
         const ids = {};
@@ -111,50 +107,23 @@ class LinxoImporter {
             return false;
         }
 
-        const browser = await puppeteer.launch({
-            headless,
-            executablePath: process.env.CHROME_BIN || null,
-            args: ['--no-sandbox', '--headless', '--disable-gpu', '--disable-dev-shm-usage']
-        });
-        const page = await browser.newPage();
+        const csvData = await fetch(`http://${process.env.BROWSERLESS_HOST}/download`, {
+            method: "POST",
+            headers: {"Content-Type": "application/javascript"},
+            body: `module.exports = async ({ page }) => {
+                await page.goto('https://wwws.linxo.com/auth.page#Login');
+                await new Promise((resolve) => setTimeout(() => resolve(), 5 * 1000));
+                await page.type('input[name="username"]', "${process.env.LINXO_USERNAME}");
+                await page.type('input[name="password"]', "${process.env.LINXO_PASSWORD}");
+                await page.click('button[type="submit"]');
+                await page.waitForNavigation();
+                await page.goto('https://wwws.linxo.com/secured/history.page#Search;accountTypes=Checkings,CreditCard;pageNumber=0;excludeDuplicates=true');
+                await new Promise((resolve) => setTimeout(() => resolve(), 10 * 1000));
+                const [button] = await page.$x("//button[contains(., 'CSV')]");
+                if (button) await button.click();
+            };`
+        }).then(res => res.arrayBuffer()).then(buf => iconv.decode(buf, "utf-16le"));
 
-        await page.goto('https://wwws.linxo.com/auth.page#Login');
-
-        await new Promise((resolve) => {
-            setTimeout(() => resolve(), 5 * 1000);
-        });
-
-        await page.type('input[name="username"]', process.env.LINXO_USERNAME);
-        await page.type('input[name="password"]', process.env.LINXO_PASSWORD);
-        await page.click('button[type="submit"]');
-        await page.waitForNavigation();
-
-        await page.goto('https://wwws.linxo.com/secured/history.page#Search;accountTypes=Checkings,CreditCard;pageNumber=0;excludeDuplicates=true');
-        await new Promise((resolve) => {
-            setTimeout(() => resolve(), 10 * 1000);
-        });
-
-        const [button] = await page.$x("//button[contains(., 'CSV')]");
-        if (button) {
-            await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath});
-            await button.click();
-
-            let fileName;
-            while (!fileName || fileName.endsWith('.crdownload')) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                [fileName] = await util.promisify(fs.readdir)(downloadPath);
-            }
-
-            await (new Promise((resolve) => {
-                setTimeout(() => resolve(true), 1000);
-            }));
-
-            await this.importData(`${downloadPath}/operations.csv`);
-            fs.unlinkSync(`${downloadPath}/operations.csv`);
-        } else {
-            console.log("Download CSV button not found.");
-        }
-
-        await browser.close();
+        await this.importData(csvData);
     }
 }

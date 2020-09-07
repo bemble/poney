@@ -93,6 +93,9 @@ class Budgets {
                                 FROM budget
                                 WHERE inUse = ?`, [1])).id;
         }
+        if (!id) {
+            return {};
+        }
 
         const budgetLines = await db.all(`SELECT *
                                           FROM budgetLine
