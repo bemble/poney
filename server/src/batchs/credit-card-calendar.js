@@ -13,7 +13,7 @@ const SCRIPT_NAME = "credit-card-calendar";
 module.exports = async () => {
     const db = await Database;
 
-    const {currentStatus} = await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`);
+    const {currentStatus} = (await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`)) || {};
     if (currentStatus === 2) {
         console.log('A credit card calendar update task is already in process, aborting.');
         process.exit(0);

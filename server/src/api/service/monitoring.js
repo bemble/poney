@@ -30,9 +30,26 @@ class Monitoring {
     static async getTotals() {
         const db = await Database;
         const conditions = await Accounts.conditions();
-        const amount = (await db.get(`SELECT SUM(amount) as amount
+        const realAmount = (await db.get(`SELECT SUM(amount) as amount
                                       FROM rawData
         WHERE (${conditions.checks.join(' OR ')})`)).amount;
+
+        let amount = realAmount;
+
+        const hasDeferredCard = !!(await Accounts.conditions()).deferredCard.length;
+        if (hasDeferredCard) {
+            amount = (await db.get(`SELECT SUM(amount) as amount
+                                      FROM rawData
+                        WHERE (${conditions.checks.join(' OR ')})
+                        AND category != "Prél. carte débit différé"`)).amount;
+            console.log(`SELECT SUM(amount) as amount
+            FROM rawData
+            WHERE (${conditions.deferredCard.join(' OR ')})
+            AND category != "Prél. carte débit différé"`);
+            amount += (await db.get(`SELECT SUM(amount) as amount
+                                      FROM rawData
+                        WHERE (${conditions.deferredCard.join(' OR ')})`)).amount;
+        }
         return {amount};
     }
 

@@ -11,7 +11,7 @@ const SCRIPT_NAME = "linxo-importer";
 module.exports = async () => {
     const db = await Database;
 
-    const {currentStatus} = await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`);
+    const {currentStatus} = (await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`)) || {};
     if (currentStatus === 2) {
         console.log('A Linxo import task is already in process, aborting.');
         process.exit(0);
