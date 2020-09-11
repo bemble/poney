@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "start": "node src/index.js",
-    "prestart": "db-migrate up && npm run prestart:scripts",
+    "prestart": "db-migrate up --config ../data/database.json && npm run prestart:scripts",
     "prestart:scripts": "npm run prestart:setBasePath && npm run prestart:handleCalendar && npm run prestart:handleStickybatchs && npm run prestart:sqliteToMySQL",
     "prestart:setBasePath": "node scripts/set-base-path-front.js",
     "prestart:handleCalendar": "node scripts/launch-batch.js credit-card-calendar",
