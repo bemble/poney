@@ -7,4 +7,7 @@ if (fs.existsSync(envFilePath)) {
 
 const [batchName] = process.argv.slice(2);
 const batch = require(fs.realpathSync(`${__dirname}/../src/batchs/${batchName}.js`));
-batch();
+(async () => {
+    await batch();
+    process.exit(0);
+})();

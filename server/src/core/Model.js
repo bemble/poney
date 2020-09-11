@@ -15,7 +15,16 @@ class Model {
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
         const db = await Database;
         const [rows] = await db.query(query.sql, query.values);
-        return rows || [];
+        return (rows || []).map(e => {
+            if (Database.driverName === "mysql") {
+                Object.keys(e).forEach(key => {
+                    if (key.endsWith("At") || key === "date") {
+                        e[key] = e[key].valueOf()/1000;
+                    }
+                });
+            }
+            return e;
+        });
     }
 
     static async insert(jsonQuery) {

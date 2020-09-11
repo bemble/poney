@@ -130,7 +130,7 @@ class Budgets {
                                         AND category NOT IN (?)
                                         AND (${conditions.checks.join(' OR ')}
                                         ${conditionDeferredCard})
-                                        GROUP BY category`, [from.unix(), to.unix(), "Prél. carte débit différé"])).filter(d => d.total !== 0);
+                                        GROUP BY category`, [Database.unixToDbDate(from.unix()), Database.unixToDbDate(to.unix()), "Prél. carte débit différé"])).filter(d => d.total !== 0);
         rawData.forEach(d => {
             if (categories[d.category] !== undefined) {
                 categories[d.category].total += d.total;
@@ -204,19 +204,19 @@ class Budgets {
             budgetCategories.push("Prél. carte débit différé");
             data = (await db.all(`SELECT *
                                       FROM rawData
-                                      WHERE date BETWEEN ? AND ?
+                                      WHERE \`date\` BETWEEN ? AND ?
                                         AND category NOT IN (${budgetCategories.map(() => "?").join(', ')})
                                         AND (${conditions.checks.join(' OR ')}
                                         ${conditionDeferredCard})
-                                      ORDER BY date DESC`, [from.unix(), to.unix(), ...budgetCategories])).filter(d => d.total !== 0);
+                                      ORDER BY date DESC`, [Database.unixToDbDate(from.unix()), Database.unixToDbDate(to.unix()), ...budgetCategories])).filter(d => d.total !== 0);
         } else {
             data = (await db.all(`SELECT *
                                       FROM rawData
-                                      WHERE date BETWEEN ? AND ?
+                                      WHERE \`date\` BETWEEN ? AND ?
                                         AND category = ?
                                         AND (${conditions.checks.join(' OR ')}
                                         ${conditionDeferredCard})
-                                      ORDER BY date DESC`, [from.unix(), to.unix(), category])).filter(d => d.total !== 0);
+                                      ORDER BY date DESC`, [Database.unixToDbDate(from.unix()), Database.unixToDbDate(to.unix()), category])).filter(d => d.total !== 0);
         }
 
         return {budgetLines, data};

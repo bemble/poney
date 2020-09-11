@@ -52,11 +52,11 @@ class Monitoring {
         SELECT * FROM
         rawData
         WHERE
-        date = ? AND amount > ? AND(${conditions.checks.join(' OR ')})`, [this.start, 0]);
+        date = ? AND amount > ? AND(${conditions.checks.join(' OR ')})`, [Database.unixToDbDate(this.start), 0]);
             data.debits = (await db.all(`SELECT * FROM
         rawData
         WHERE
-        date = ? AND amount < ? AND(${conditions.checks.join(' OR ')})`, [this.start, 0])).map(l => ({
+        date = ? AND amount < ? AND(${conditions.checks.join(' OR ')})`, [Database.unixToDbDate(this.start), 0])).map(l => ({
                 ...l,
                 amount: Math.abs(l.amount)
             }));
@@ -64,7 +64,7 @@ class Monitoring {
                 data.deferredCard = (await db.all(`SELECT * FROM
         rawData
         WHERE
-        date = ? AND amount < ? AND(${conditions.deferredCard.join(' OR ')})`, [this.start, 0])).map(l => ({
+        date = ? AND amount < ? AND(${conditions.deferredCard.join(' OR ')})`, [Database.unixToDbDate(this.start), 0])).map(l => ({
                     ...l,
                     amount: Math.abs(l.amount)
                 }));
@@ -161,7 +161,7 @@ class Monitoring {
             FROM rawData
             WHERE date BETWEEN ? AND ?
             GROUP BY date
-            ORDER BY date DESC`, [this.start, this.end]);
+            ORDER BY date DESC`, [Database.unixToDbDate(this.start), Database.unixToDbDate(this.end)]);
     }
 
     async budget() {
@@ -240,7 +240,7 @@ class Monitoring {
                 WHERE r.date >= ?
                   AND r.date <= ?
                 GROUP BY r.date
-                ORDER BY r.date ASC`, [params.start, params.start, params.end]);
+                ORDER BY r.date ASC`, [Database.unixToDbDate(params.start), Database.unixToDbDate(params.start), Database.unixToDbDate(params.end)]);
             const tmpOperationsByDay = {};
             periodOperations.forEach(l => {
                 tmpOperationsByDay[formatDate(moment.utc(l.date, 'X'))] = l.amount;
@@ -318,7 +318,7 @@ class Monitoring {
                         WHERE amount < ?
                           AND date > ?
                           AND date <= ?
-                          AND(${conditions.deferredCard.join(' OR ')})`, [0, startMoment.unix(), endMoment.unix()]);
+                          AND(${conditions.deferredCard.join(' OR ')})`, [0, Database.unixToDbDate(startMoment.unix()), Database.unixToDbDate(endMoment.unix())]);
                     linesByDay[formatDate(curMoment)] = Math.abs(data.amount - budgetized);
                     budgetized = 0;
                 }

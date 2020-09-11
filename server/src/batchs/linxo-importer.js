@@ -74,7 +74,7 @@ class LinxoImporter {
                                                 WHERE computedId = ?`, [currentId]);
                     let query = "";
                     let queryParams = [];
-                    const dateTimestamp = moment.utc(`${year}-${month}-${day}`).unix();
+                    const dateTimestamp = Database.unixToDbDate(moment.utc(`${year}-${month}-${day}`).unix());
                     if (found) {
                         query = `UPDATE rawData
                                  SET

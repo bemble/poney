@@ -3,12 +3,12 @@
   "scripts": {
     "start": "node src/index.js",
     "prestart": "db-migrate up && npm run prestart:scripts",
-    "prestart:scripts": "npm run prestart:setBasePath && npm run prestart:handleCalendar && npm run prestart:handleStickybatchs",
+    "prestart:scripts": "npm run prestart:setBasePath && npm run prestart:handleCalendar && npm run prestart:handleStickybatchs && npm run prestart:sqliteToMySQL",
     "prestart:setBasePath": "node scripts/set-base-path-front.js",
     "prestart:handleCalendar": "node scripts/launch-batch.js credit-card-calendar",
     "prestart:handleStickybatchs": "node scripts/launch-batch.js reset-batchs-status",
     "prestart:sqliteToMySQL": "node scripts/sqlite-to-mysql.js",
-    "prestart:dev": "db-migrate up --config ../data/database.json",
+    "prestart:dev": "db-migrate up --config ../data/database.json && npm run prestart:handleCalendar",
     "start:dev": "APP_ENVIRONMENT=dev nodemon src/index.js"
   },
   "dependencies": {

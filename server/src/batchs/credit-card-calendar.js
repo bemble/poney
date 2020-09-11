@@ -14,7 +14,7 @@ module.exports = async () => {
     const db = await Database;
 
     const {currentStatus} = await db.get(`SELECT COALESCE(status, 0) AS currentStatus FROM batchHistory WHERE script = "${SCRIPT_NAME}"`);
-    if(currentStatus === 2) {
+    if (currentStatus === 2) {
         console.log('A credit card calendar update task is already in process, aborting.');
         process.exit(0);
     }
@@ -32,22 +32,23 @@ module.exports = async () => {
                                     ORDER BY date ASC
                                     LIMIT 1`);
     if (firstData) {
-        const firstMoment = moment.unix(firstData.date).subtract(1, 'months');
+        const firstMoment = moment.unix(Database.dbDateToUnix(firstData.date)).subtract(1, 'months');
         const creditCardCalendar = {};
         ((await db.all(`SELECT *
                         FROM creditCardCalendar`)) || []).forEach(c => {
             creditCardCalendar[`${c.year}-${c.month}`] = c.day;
         });
         const insertPromises = [];
-        const toMoment = moment().add(2, 'months');
+        const toMoment = moment().add(6, 'months');
         for (let currentYear = firstMoment.year(); currentYear <= toMoment.year(); currentYear++) {
             const startMonth = (currentYear === firstMoment.year()) ? firstMoment.month() : 0;
             const endMonth = (currentYear === toMoment.year()) ? toMoment.month() : 11;
             for (let currentMonth = startMonth; currentMonth <= endMonth; currentMonth++) {
                 if (!creditCardCalendar[`${currentYear}-${currentMonth + 1}`]) {
                     const expectedMoment = moment([currentYear, currentMonth, 28]);
-                    const values = [currentYear, currentMonth + 1,  getBusinessDayDateClosestTo(expectedMoment)];
-                    insertPromises.push(db.run(`INSERT INTO creditCardCalendar (year, month, day) VALUES (?1, ?2, ?3)`, values))
+                    const values = [currentYear, currentMonth + 1, getBusinessDayDateClosestTo(expectedMoment)];
+                    insertPromises.push(db.run(`INSERT INTO creditCardCalendar (year, month, day)
+                                                VALUES (?, ?, ?)`, values))
                 }
             }
         }
@@ -56,8 +57,8 @@ module.exports = async () => {
     }
 
     await db.run(`REPLACE INTO batchHistory
-                     (script, status, message, lastRunnedAt)
-                   VALUES
-                     (?, ?, ?, ?)`, [SCRIPT_NAME, 0, null, Database.currentTimestamp()]);
+                    (script, status, message, lastRunnedAt)
+                  VALUES
+                    (?, ?, ?, ?)`, [SCRIPT_NAME, 0, null, Database.currentTimestamp()]);
     console.log('Task finished.');
 };

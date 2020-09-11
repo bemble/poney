@@ -10,17 +10,21 @@ if (dbConf.driver === "sqlite3") {
     Database = sqlite.open(`${__dirname}/../../${dbConf.filename}`, {Promise});
     Database.builder = new SQLBuilder("SQLite");
     Database.currentTimestamp = () => moment.utc().unix();
+    Database.unixToDbDate = (unix) => unix;
+    Database.dbDateToUnix = (date) => date;
 } else {
     const mysqlConf = {...dbConf};
     delete mysqlConf.driver;
     Database = (mysql.createConnection(mysqlConf)).then(db => {
         db.all = (sql, params) => db.execute(sql, params).then(([rows]) => rows);
-        db.get = (sql, params) => db.execute(sql, params).then(([rows]) => rows[0] || {});
+        db.get = (sql, params) => db.execute(sql, params).then(([rows]) => rows[0] || null);
         db.run = (sql, params) => db.execute(sql, params);
         return db;
     });
     Database.builder = new SQLBuilder("MySQL");
-    Database.currentTimestamp = () => new Date(moment.utc().unix());
+    Database.currentTimestamp = () => new Date(moment.utc().unix() * 1000);
+    Database.unixToDbDate = (unix) => new Date(unix * 1000);
+    Database.dbDateToUnix = (date) => Math.round(date.valueOf() / 1000);
 }
 
 Database.driverName = dbConf.driver;
