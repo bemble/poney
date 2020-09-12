@@ -30,24 +30,26 @@ if (!(hasSqlite && hasMysql && dbConf[dbConf.defaultEnv].driver === "mysql" && f
     const promises = tablesToMigrate.map(async (tableName) => {
         const lines = await sqliteDb.all(`SELECT *
         FROM ${tableName}`);
-        const keys = Object.keys(lines[0]);
-        const query = `INSERT INTO ${tableName} (\`${keys.join('`,`')}\`) VALUES ?`;
-        const values = lines.map(line => {
-            if (line.updatedAt && !line.addedAt) {
-                line.addedAt = line.updatedAt;
-            }
-            Object.keys(line).forEach(key => {
-                if (key.endsWith("At") || (tableName === "rawData" && key === "date")) {
-                    line[key] = new Date(line[key] * 1000);
-                } else if (["amount", "expectedAmount", "alreadyPaidAmount"].indexOf(key) >= 0 && !line[key]) {
-                    line[key] = 0;
+        if (lines.length) {
+            const keys = Object.keys(lines[0]);
+            const query = `INSERT INTO ${tableName} (\`${keys.join('`,`')}\`) VALUES ?`;
+            const values = lines.map(line => {
+                if (line.updatedAt && !line.addedAt) {
+                    line.addedAt = line.updatedAt;
                 }
+                Object.keys(line).forEach(key => {
+                    if (key.endsWith("At") || (tableName === "rawData" && key === "date")) {
+                        line[key] = new Date(line[key] * 1000);
+                    } else if (["amount", "expectedAmount", "alreadyPaidAmount"].indexOf(key) >= 0 && !line[key]) {
+                        line[key] = 0;
+                    }
+                });
+                const v = [];
+                keys.forEach(k => v.push(line[k]));
+                return v;
             });
-            const v = [];
-            keys.forEach(k => v.push(line[k]));
-            return v;
-        });
-        await mysqlDb.query(query, [values]);
+            await mysqlDb.query(query, [values]);
+        }
     });
     await Promise.all(promises);
 
