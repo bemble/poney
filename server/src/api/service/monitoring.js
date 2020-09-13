@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const {formatDate, getDateStr} = require("../../core/Tools");
-const {Database} = require('../../core');
+const {Database, Model} = require('../../core');
 const {Accounts} = require('../../core/helpers');
 const moment = require('moment');
 
@@ -38,19 +38,20 @@ class Monitoring {
 
         const hasDeferredCard = !!(await Accounts.conditions()).deferredCard.length;
         if (hasDeferredCard) {
-            amount = (await db.get(`SELECT SUM(amount) as amount
+            const amountWWithoutLevys= (await db.get(`SELECT SUM(amount) as amount
                                       FROM rawData
                         WHERE (${conditions.checks.join(' OR ')})
                         AND category != "Prél. carte débit différé"`)).amount;
-            console.log(`SELECT SUM(amount) as amount
-            FROM rawData
-            WHERE (${conditions.deferredCard.join(' OR ')})
-            AND category != "Prél. carte débit différé"`);
-            amount += (await db.get(`SELECT SUM(amount) as amount
+            const amountDeferredCard = (await db.get(`SELECT SUM(amount) as amount
                                       FROM rawData
                         WHERE (${conditions.deferredCard.join(' OR ')})`)).amount;
+            const gap = parseFloat(((await Model.getOne({
+                $from: "configuration",
+                $where: {id: "DEFERREDCB_INITIAL_GAP"}
+            })) || {}).value || 0);
+            amount = amountWWithoutLevys + amountDeferredCard - gap;
         }
-        return {amount};
+        return {realAmount, amount};
     }
 
     static async getDetails(date) {

@@ -83,6 +83,10 @@ export default class Configuration extends React.Component {
                         <Conf label="Solde bas pour les comptes épargne" id="WARNING_AMOUNT_SAVINGS"/>
                     </div>
                     <div hidden={currentPanel !== 1}>
+                        <Grid item xs={12}>
+                            <SubTitle>Écart initial</SubTitle>
+                            <Conf label="Écart initial entre les comptes et l'application" id="ACCOUNTS_INITIAL_GAP"/>
+                        </Grid>
                         <AccountSettings onChange={() => this.updateAccounts()}/>
                     </div>
                     <div hidden={currentPanel !== 2}>
@@ -90,6 +94,10 @@ export default class Configuration extends React.Component {
                             <Grid item xs={12}>
                                 <SubTitle>Jour de prélèvement</SubTitle>
                                 <Conf label="Jour de prélèvement CB diff." id="DEFERREDCB_LEVY_DAY"/>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <SubTitle>Écart initial</SubTitle>
+                                <Conf label="Écart initial dans le montant de carte bancaire" id="DEFERREDCB_INITIAL_GAP"/>
                             </Grid>
                             <Grid item xs={12}>
                                 <SubTitle>Fin d'exercice (jour inclus)</SubTitle>
