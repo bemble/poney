@@ -1,5 +1,5 @@
 const sqlite = require('sqlite');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 const moment = require("moment");
 const SQLBuilder = require('json-sql-builder2');
 
@@ -13,9 +13,14 @@ if (dbConf.driver === "sqlite3") {
     Database.unixToDbDate = (unix) => unix;
     Database.dbDateToUnix = (date) => date;
 } else {
-    const mysqlConf = {...dbConf};
+    const mysqlConf = {
+        ...dbConf,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+    };
     delete mysqlConf.driver;
-    Database = (mysql.createConnection(mysqlConf)).then(db => {
+    Database = Promise.resolve(mysql.createPool(mysqlConf).promise()).then(db => {
         db.all = (sql, params) => db.execute(sql, params).then(([rows]) => rows);
         db.get = (sql, params) => db.execute(sql, params).then(([rows]) => rows[0] || null);
         db.run = (sql, params) => db.execute(sql, params);
