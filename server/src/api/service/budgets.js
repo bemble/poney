@@ -219,6 +219,9 @@ class Budgets {
                                       ORDER BY date DESC`, [Database.unixToDbDate(from.unix()), Database.unixToDbDate(to.unix()), category])).filter(d => d.total !== 0);
         }
 
-        return {budgetLines, data};
+        return {budgetLines, data: data.map(d => {
+            d.date = Database.dbDateToUnix(d.date);
+            return d;
+        })};
     }
 }
