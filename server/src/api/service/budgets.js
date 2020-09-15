@@ -105,7 +105,7 @@ class Budgets {
             (l.categories || "").split('|').forEach(c => {
                 c = c === "" ? "Sans catégorie Linxo" : c;
                 if (!categories[c]) {
-                    categories[c] = {expected: 0, total: 0, calendar: [], isIncome: l.isIncome};
+                    categories[c] = {expected: 0, total: 0, calendar: [], isIncome: l.isIncome, color: l.color};
                 }
                 const amount = l.isIncome ? l.amount : -l.amount;
                 categories[c].expected += amount;

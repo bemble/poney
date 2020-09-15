@@ -27,6 +27,36 @@ import {Close as CloseIcon} from "@material-ui/icons";
 import {blue, indigo} from "@material-ui/core/colors";
 
 const useStyles = makeStyles(theme => ({
+    root: {
+        display: "flex",
+        flexDirection: "column"
+    },
+    item: {
+        display: "flex",
+        fontSize: 14,
+        textAlign: "left",
+        fontWeight: 200,
+        marginBottom: 4
+    },
+    category: {
+        width: "33%",
+        overflow: "hidden",
+        height: 20
+    },
+    barContainer: {
+        width: "67%",
+        border: `1px solid ${theme.palette.text.hint}`,
+        borderRadius: 2,
+        overflow: "hidden",
+        background: theme.palette.text.disabled
+    },
+    bar: {
+        height: "100%",
+        paddingLeft: 4,
+        background: theme.palette.text.hint,
+        borderBottom: `1px solid ${theme.palette.text.hint}`,
+        color: theme.palette.background.default
+    },
     warningIcon: {
         marginRight: theme.spacing(),
         color: theme.palette.warning.light
@@ -43,11 +73,8 @@ const useStyles = makeStyles(theme => ({
             marginRight: theme.spacing()
         }
     },
-    expected: {
-        color: theme.palette.text.hint
-    },
     off: {
-        backgroundColor: theme.palette.warning.main
+        color: theme.palette.warning.dark
     },
     income: {
         color: theme.palette.success.main
@@ -125,7 +152,7 @@ export default React.memo((props) => {
             setUsage(newUsage);
             setIsLoading(false);
         })();
-    }, [props.month]);
+    }, [props.month, props.onlyWarnings]);
 
     const closeDetails = () => setDetails(null);
     const showDetails = async (category) => {
@@ -148,27 +175,22 @@ export default React.memo((props) => {
         </div>
     }
 
-    return <div><Table>
-        <TableBody>
-            {Object.keys(usage).map(k => <TableRow key={k} className={k === "off" ? classes.off : ""}>
-                <TableCell onClick={() => showDetails(k)}>
-                    {usage[k].hasWarning && !usage[k].isLightWarning ?
-                        <FontAwesomeIcon icon={faExclamationTriangle} className={classes.warningIcon}/> : null}
-                    {usage[k].hasWarning && usage[k].isLightWarning ?
-                        <FontAwesomeIcon icon={faExclamationCircle} className={classes.lightWarningIcon}/> : null}
-                    <span
-                        className={usage[k].isIncome ? classes.income : ""}>{k === "off" ? "Hors budget" : k}</span> : {formatNumber(usage[k].total)}
-                    <span className={classes.expected}>/{formatNumber(usage[k].expected)}</span><br/>
-                    {usage[k].displayCalendar.length ? <span className={classes.calendar}>
-                            <FontAwesomeIcon icon={faCalendarAlt}/>
-                            Opérations attendues
-                        {usage[k].displayCalendar.length === 1 ? " le " : " les "}
-                        {usage[k].displayCalendar.join(', ')}
-                            </span> : null}
-                </TableCell>
-            </TableRow>)}
-        </TableBody>
-    </Table>
+    return <div className={classes.root}>
+        {Object.keys(usage).map(k => <div key={k} className={classes.item + " " + (k === "off" ? classes.off : "")} onClick={() => showDetails(k)}>
+            <div className={classes.category}>
+                {usage[k].hasWarning && !usage[k].isLightWarning ?
+                    <FontAwesomeIcon icon={faExclamationTriangle} className={classes.warningIcon}/> : null}
+                {usage[k].hasWarning && usage[k].isLightWarning ?
+                    <FontAwesomeIcon icon={faExclamationCircle} className={classes.lightWarningIcon}/> : null}
+                <span
+                    className={usage[k].isIncome ? classes.income : ""}>{k === "off" ? "Hors budget" : k}</span>
+            </div>
+            <div className={classes.barContainer} style={{borderColor: usage[k].color}}>
+                <div className={classes.bar} style={{width: `${Math.min(usage[k].total/usage[k].expected, 1)*100}%`, borderBottomColor: usage[k].color}}>
+                    {formatNumber(usage[k].total)}/{formatNumber(usage[k].expected)}
+                </div>
+            </div>
+        </div>)}
         <Dialog fullScreen className={classes.dialog} open={!!details} TransitionComponent={Transition}
                 onClose={closeDetails}>
             <AppBar className={classes.appBar}>

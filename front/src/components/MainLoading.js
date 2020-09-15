@@ -31,6 +31,14 @@ const useStyles = makeStyles(theme => ({
     title: {
         fontSize: 36,
         fontWeight: 200
+    },
+    version: {
+        opacity: 0.5,
+        fontSize: "0.95em",
+        "& span": {
+            fontFamily: "monospace",
+            fontWeight: "bold"
+        }
     }
 }));
 
@@ -49,5 +57,6 @@ export default React.memo(() => {
         </div>
         <h1 className={classes.title}>Poney</h1>
         <p>Chargement de l'application...</p>
+        <p className={classes.version}>Version <span>{process.env.REACT_APP_VERSION || "dev"}</span></p>
     </div>;
 });

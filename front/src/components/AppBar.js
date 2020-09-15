@@ -61,7 +61,8 @@ export default React.memo((props) => {
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleMenu = (event) => {
-        setAnchorEl(event.currentTarget);
+        const anchor = [...event.currentTarget.children].filter(e => e.classList.contains("MuiListItemIcon-root"))[0];
+        setAnchorEl(anchor);
     };
 
     const handleClose = () => {
@@ -83,9 +84,8 @@ export default React.memo((props) => {
                 </ListItem>
             </NavLink>)}
             {props.secondaryLinks ? <div className={classes.menuItem}>
-                <ListItem button className={classes.item}>
-                    <ListItemIcon className={classes.itemIcon} aria-haspopup="true"
-                                  onClick={handleMenu}>
+                <ListItem button className={classes.item} onClick={handleMenu}>
+                    <ListItemIcon className={classes.itemIcon} aria-haspopup="true">
                         <FontAwesomeIcon icon={faEllipsisH}/>
                     </ListItemIcon>
                     <ListItemText className={classes.itemText} primary={"Plus"}/>

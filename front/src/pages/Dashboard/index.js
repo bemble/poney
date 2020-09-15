@@ -7,7 +7,7 @@ import {faMoneyCheckAlt, faPiggyBank} from "@fortawesome/free-solid-svg-icons";
 import {useHistory} from "react-router-dom";
 
 import AccountWeather from "./AccountWeather";
-import BudgetAlert from "./BudgetAlert";
+import Budget from "./Budget";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -82,10 +82,10 @@ export default React.memo((props) => {
                          onClick={() => history.push("/comptes-epargne")}/>
             </Grid>
             <Grid item xs={12}>
-                <AccountWeather lastSynchUpdate={(lastSynch && lastSynch.runnedAt) || 0} warning={warning}/>
+                <Budget />
             </Grid>
             <Grid item xs={12}>
-                <BudgetAlert />
+                <AccountWeather lastSynchUpdate={(lastSynch && lastSynch.runnedAt) || 0} warning={warning}/>
             </Grid>
         </Grid>
     </div>;
