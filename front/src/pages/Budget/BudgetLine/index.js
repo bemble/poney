@@ -47,11 +47,6 @@ export default React.memo((props) => {
     const [id, setId] = useState(props.id);
     const [color, setColor] = useState(props.color);
 
-    const onCreated = (newId) => {
-        setId(newId);
-        props.onCreated && props.onCreated(props.id, newId);
-    };
-
     const getOperationKindLabel = (operationKind) => {
         if (!operationKind) return "";
         const [elt] = operationKinds.filter(e => e.value === props.operationKind);

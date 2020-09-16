@@ -15,7 +15,7 @@ import {
     Typography
 } from "@material-ui/core";
 import Loading from "../../components/Loading";
-import {grey, green, indigo, blue, amber} from "@material-ui/core/colors";
+import {green, indigo, blue, amber} from "@material-ui/core/colors";
 import moment from 'moment';
 import {Search as SearchIcon, Close as CloseIcon} from "@material-ui/icons";
 import Api from "../../core/Api";

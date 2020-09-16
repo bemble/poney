@@ -4,7 +4,7 @@ import './index.css';
 import '../node_modules/react-vis/dist/style.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import store from "./UpdateStore";
+//import store from "./UpdateStore";
 
 const updateVh = () => {
     let vh = window.innerHeight * 0.01;
