@@ -113,7 +113,7 @@ export default React.memo(() => {
             {isInitialLoading ? null : <div style={{background: theme.palette.background.default}}>
                 {!isSignedId ? <Login onSuccess={onLoadingSuccess} onReady={() => setIsLoading(false)}/> :
                     <div style={{minHeight: 'calc(var(--vh, 1vh) * 100)'}}>
-                        <main className={classes.content}>
+                        <main className="app-content">
                             <Route path="/" exact component={Dashboard}/>
                             <Route path="/comptes-epargne" component={Saving}/>
                             <Route path="/projets" exact component={Projects}/>

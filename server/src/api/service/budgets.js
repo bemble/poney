@@ -20,7 +20,7 @@ router.get('/totals/:id', async (req, res) => {
 });
 
 router.get('/usage/details/:id*?', async (req, res) => {
-    res.json(await Budgets.getUsageDetails(req.params.id, req.query.category, req.query.month));
+    res.json(await Budgets.getUsageDetails(req.params.id, req.query.budgetLineId, req.query.category, req.query.onlyComing, req.query.month));
 });
 
 router.get('/usage/:id*?', async (req, res) => {
@@ -101,18 +101,26 @@ class Budgets {
                                           FROM budgetLine
                                           WHERE idBudget = ?`, [id]);
         const categories = {};
+        categories.off = {expected: 0, total: 0, calendar: [], isIncome: false, budgetLineIds: []};
         budgetLines.forEach(l => {
             (l.categories || "").split('|').forEach(c => {
                 c = c === "" ? "Sans catégorie Linxo" : c;
                 if (!categories[c]) {
-                    categories[c] = {expected: 0, total: 0, calendar: [], isIncome: l.isIncome, color: l.color};
+                    categories[c] = {
+                        expected: 0,
+                        total: 0,
+                        calendar: [],
+                        isIncome: l.isIncome,
+                        color: l.color,
+                        budgetLineIds: []
+                    };
                 }
                 const amount = l.isIncome ? l.amount : -l.amount;
                 categories[c].expected += amount;
                 categories[c].calendar.push({dayOfMonth: l.dayOfMonth, amount});
+                categories[c].budgetLineIds.push(l.id);
             });
         });
-        categories.off = {expected: 0, total: 0, calendar: [], isIncome: false};
 
         const from = moment.utc(month ? `${month}-01` : undefined).startOf('month');
         let to = moment.utc(month ? `${month}-01` : undefined).endOf('month');
@@ -139,6 +147,25 @@ class Budgets {
             }
         });
 
+        // Switch to budget line when possible
+        Object.keys(categories).filter(k => categories[k].budgetLineIds.length === 1)
+            .forEach(k => {
+                const [line] = budgetLines.filter(e => e.id === categories[k].budgetLineIds[0]);
+                if (!categories[line.label]) {
+                    categories[line.label] = {
+                        expected: line.isIncome ? line.amount : -line.amount,
+                        total: 0,
+                        calendar: [],
+                        isIncome: line.isIncome,
+                        color: line.color,
+                        budgetLineId: line.id
+                    };
+                }
+                categories[line.label].total += categories[k].total;
+                categories[line.label].calendar = [...categories[line.label].calendar, ...categories[k].calendar].filter((v, i, a) => a.indexOf(v) === i);
+                delete categories[k];
+            });
+
         Object.keys(categories).forEach(k => {
             const currentExpected = categories[k].calendar
                 .filter(e => e.dayOfMonth <= to.date())
@@ -158,34 +185,42 @@ class Budgets {
         return categories;
     }
 
-    static async getUsageDetails(id, category, month = null) {
+    static async getUsageDetails(id, budgetLineId, category, onlyComing, month = null) {
         const db = await Database;
 
         if (category === "Sans catégorie Linxo") {
             category = "";
         }
+        category = [category];
 
-        if (!id) {
-            id = (await db.get(`SELECT id
-                                FROM budget
-                                WHERE inUse = ?`, [1])).id;
+        let budgetLines = [];
+        if (budgetLineId) {
+            budgetLines = (await db.all(`SELECT *
+                                         FROM budgetLine
+                                         WHERE id = ?`, [budgetLineId]));
+            category = (budgetLines[0].categories || "").split('|');
+        } else {
+            if (!id) {
+                id = (await db.get(`SELECT id
+                                    FROM budget
+                                    WHERE inUse = ?`, [1])).id;
+            }
+            budgetLines = (await db.all(`SELECT *
+                                         FROM budgetLine
+                                         WHERE idBudget = ?`, [id]))
         }
-
         let budgetCategories = [];
-        const budgetLines = (await db.all(`SELECT *
-                                           FROM budgetLine
-                                           WHERE idBudget = ?`, [id]))
-            .map(l => {
-                if (l.categories.length) {
-                    budgetCategories.push(l.categories);
-                }
-                l.categories = (l.categories || "").split('|');
+        budgetLines.map(l => {
+            if (l.categories.length) {
+                budgetCategories.push(l.categories);
+            }
+            l.categories = (l.categories || "").split('|');
 
-                if (!l.isIncome) {
-                    l.amount = -l.amount;
-                }
-                return l;
-            }).filter(l => l.categories.indexOf(category) !== -1);
+            if (!l.isIncome) {
+                l.amount = -l.amount;
+            }
+            return l;
+        }).filter(l => l.categories.indexOf(category) !== -1);
         budgetCategories = budgetCategories.join("|").split("|").filter((value, index, self) => self.indexOf(value) === index);
 
         const from = moment.utc(month ? `${month}-01` : undefined).startOf('month');
@@ -200,8 +235,9 @@ class Budgets {
         const conditionDeferredCard = conditions.deferredCard ? `OR (${conditions.deferredCard.join(' OR ')})` : "";
         let data = [];
 
-        if (category === "off") {
+        if (category[0] === "off") {
             budgetCategories.push("Prél. carte débit différé");
+            budgetLines.length = 0;
             data = (await db.all(`SELECT *
                                       FROM rawData
                                       WHERE \`date\` BETWEEN ? AND ?
@@ -213,15 +249,20 @@ class Budgets {
             data = (await db.all(`SELECT *
                                       FROM rawData
                                       WHERE \`date\` BETWEEN ? AND ?
-                                        AND category = ?
+                                        AND category IN (${category.map(() => "?").join(', ')})
                                         AND (${conditions.checks.join(' OR ')}
                                         ${conditionDeferredCard})
-                                      ORDER BY date DESC`, [Database.unixToDbDate(from.unix()), Database.unixToDbDate(to.unix()), category])).filter(d => d.total !== 0);
+                                      ORDER BY date DESC`, [Database.unixToDbDate(from.unix()), Database.unixToDbDate(to.unix()), ...category])).filter(d => d.total !== 0);
         }
 
-        return {budgetLines, data: data.map(d => {
-            d.date = Database.dbDateToUnix(d.date);
-            return d;
-        })};
+        budgetLines = onlyComing ? budgetLines.filter(l => (l.dayOfMonth >= moment.utc().date())) : budgetLines;
+        budgetLines.sort((a, b) => a.dayOfMonth - b.dayOfMonth);
+        return {
+            budgetLines,
+            data: data.map(d => {
+                d.date = Database.dbDateToUnix(d.date);
+                return d;
+            })
+        };
     }
 }

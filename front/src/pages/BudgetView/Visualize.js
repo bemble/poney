@@ -29,11 +29,6 @@ import {blue, indigo} from "@material-ui/core/colors";
 import "./Visualize.scss";
 
 const useStyles = makeStyles(theme => ({
-    category: {
-        width: "33%",
-        overflow: "hidden",
-        height: 20
-    },
     barContainer: {
         position: "relative",
         width: "67%",
@@ -67,7 +62,7 @@ const useStyles = makeStyles(theme => ({
         }
     },
     off: {
-        "& .categoryName": {
+        "& .category-name": {
             color: theme.palette.warning.dark
         },
         "& .barContainer": {
@@ -156,10 +151,16 @@ export default React.memo((props) => {
     }, [props.month, props.onlyWarnings]);
 
     const closeDetails = () => setDetails(null);
-    const showDetails = async (category) => {
+    const showDetails = async (category, budgetLineId, onlyComing) => {
         setIsLoading(true);
         const path = `budgets/usage/details${props.id ? `/${props.id}` : ""}`;
         const queryParams = {category};
+        if (budgetLineId) {
+            queryParams.budgetLineId = budgetLineId;
+        }
+        if (onlyComing) {
+            queryParams.onlyComing = onlyComing;
+        }
         if (props.month) {
             queryParams.month = props.month;
         }
@@ -177,19 +178,23 @@ export default React.memo((props) => {
     }
 
     return <div className="budget-visualize">
-        {Object.keys(usage).map(k => <div key={k} className={"item " + (k === "off" ? classes.off : "")} onClick={() => showDetails(k)}>
-            <div className={classes.category}>
+        {Object.keys(usage).map(k => <div key={k} className={"item " + (k === "off" ? classes.off : "")}
+                                          onClick={() => showDetails(k, usage[k].budgetLineId, !(usage[k].hasWarning && usage[k].isLightWarning))}>
+            <div className="category">
                 {!props.onlyWarnings && usage[k].hasWarning && !usage[k].isLightWarning ?
                     <FontAwesomeIcon icon={faExclamationTriangle} className={classes.warningIcon}/> : null}
                 {!props.onlyWarnings && usage[k].hasWarning && usage[k].isLightWarning ?
                     <FontAwesomeIcon icon={faExclamationCircle} className={classes.lightWarningIcon}/> : null}
                 <span
-                    className={classes.categoryName + " " +(usage[k].isIncome ? classes.income : "")}>{k === "off" ? "Hors budget" : k}</span>
+                    className={"category-name " + (usage[k].isIncome ? classes.income : "")}>{k === "off" ? "Hors budget" : k}</span>
             </div>
             <div className={classes.barContainer} style={{borderColor: usage[k].color}}>
-                <div className={classes.bar} style={{width: `${Math.min(usage[k].total/usage[k].expected, 1)*100}%`, backgroundColor: usage[k].color}}>
+                <div className={classes.bar} style={{
+                    width: `${Math.min(usage[k].total / (usage[k].expected || -0.01), 1) * 100}%`,
+                    backgroundColor: usage[k].color
+                }}>
                 </div>
-                <span>{formatNumber(usage[k].total)}/{formatNumber(usage[k].expected)}</span>
+                <span>{formatNumber(usage[k].total)}{usage[k].expected ? "/" + formatNumber(usage[k].expected) : ""}</span>
             </div>
         </div>)}
         <Dialog fullScreen className={classes.dialog} open={!!details} TransitionComponent={Transition}
@@ -212,7 +217,7 @@ export default React.memo((props) => {
                 {details ? <TableBody>
                     {details.budgetLines.map((line, i) => <TableRow hover key={`budget-${i}`}>
                         <TableCell className={classes.details}>
-                            {line.label}<br/>
+                            {line.label}{line.notes ? ` (${line.notes})` : ""}<br/>
                             <span className={classes.calendar}>
                                 <FontAwesomeIcon icon={faCalendarAlt}/>
                                 Opération attendue le {line.dayOfMonth}
@@ -222,7 +227,7 @@ export default React.memo((props) => {
                     </TableRow>)}
                     {details.data.map((line, i) => <TableRow hover key={`data-${i}`}>
                         <TableCell className={classes.data}>
-                            {line.label}<br/>
+                            {line.label}{line.notes ? ` (${line.notes})` : ""}<br/>
                             <span className={classes.dataCalendar}>
                                 <FontAwesomeIcon icon={faCalendarAlt}/>
                                 {moment.unix(line.date).format("DD/MM")}
