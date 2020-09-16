@@ -1,0 +1,12 @@
+.budget-visualize {
+  display: flex;
+  flex-direction: column;
+
+  .item {
+      display: flex;
+      font-size: 14px;
+      text-align: left;
+      font-weight: 200;
+      margin-bottom: 4px;
+  }
+}
