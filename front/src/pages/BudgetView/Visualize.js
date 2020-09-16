@@ -26,36 +26,29 @@ import {formatNumber} from "../../core/Tools";
 import {Close as CloseIcon} from "@material-ui/icons";
 import {blue, indigo} from "@material-ui/core/colors";
 
+import "./Visualize.scss";
+
 const useStyles = makeStyles(theme => ({
-    root: {
-        display: "flex",
-        flexDirection: "column"
-    },
-    item: {
-        display: "flex",
-        fontSize: 14,
-        textAlign: "left",
-        fontWeight: 200,
-        marginBottom: 4
-    },
     category: {
         width: "33%",
         overflow: "hidden",
         height: 20
     },
     barContainer: {
+        position: "relative",
         width: "67%",
         border: `1px solid ${theme.palette.text.hint}`,
         borderRadius: 2,
         overflow: "hidden",
-        background: theme.palette.text.disabled
+        paddingLeft: 4
     },
     bar: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
         height: "100%",
-        paddingLeft: 4,
         background: theme.palette.text.hint,
-        borderBottom: `1px solid ${theme.palette.text.hint}`,
-        color: theme.palette.background.default
+        opacity: 0.4
     },
     warningIcon: {
         marginRight: theme.spacing(),
@@ -74,7 +67,15 @@ const useStyles = makeStyles(theme => ({
         }
     },
     off: {
-        color: theme.palette.warning.dark
+        "& .categoryName": {
+            color: theme.palette.warning.dark
+        },
+        "& .barContainer": {
+            borderColor: theme.palette.warning.main
+        },
+        "& .bar": {
+            backgroundColor: theme.palette.warning.main
+        }
     },
     income: {
         color: theme.palette.success.main
@@ -175,20 +176,20 @@ export default React.memo((props) => {
         </div>
     }
 
-    return <div className={classes.root}>
-        {Object.keys(usage).map(k => <div key={k} className={classes.item + " " + (k === "off" ? classes.off : "")} onClick={() => showDetails(k)}>
+    return <div className="budget-visualize">
+        {Object.keys(usage).map(k => <div key={k} className={"item " + (k === "off" ? classes.off : "")} onClick={() => showDetails(k)}>
             <div className={classes.category}>
-                {usage[k].hasWarning && !usage[k].isLightWarning ?
+                {!props.onlyWarnings && usage[k].hasWarning && !usage[k].isLightWarning ?
                     <FontAwesomeIcon icon={faExclamationTriangle} className={classes.warningIcon}/> : null}
-                {usage[k].hasWarning && usage[k].isLightWarning ?
+                {!props.onlyWarnings && usage[k].hasWarning && usage[k].isLightWarning ?
                     <FontAwesomeIcon icon={faExclamationCircle} className={classes.lightWarningIcon}/> : null}
                 <span
-                    className={usage[k].isIncome ? classes.income : ""}>{k === "off" ? "Hors budget" : k}</span>
+                    className={classes.categoryName + " " +(usage[k].isIncome ? classes.income : "")}>{k === "off" ? "Hors budget" : k}</span>
             </div>
             <div className={classes.barContainer} style={{borderColor: usage[k].color}}>
-                <div className={classes.bar} style={{width: `${Math.min(usage[k].total/usage[k].expected, 1)*100}%`, borderBottomColor: usage[k].color}}>
-                    {formatNumber(usage[k].total)}/{formatNumber(usage[k].expected)}
+                <div className={classes.bar} style={{width: `${Math.min(usage[k].total/usage[k].expected, 1)*100}%`, backgroundColor: usage[k].color}}>
                 </div>
+                <span>{formatNumber(usage[k].total)}/{formatNumber(usage[k].expected)}</span>
             </div>
         </div>)}
         <Dialog fullScreen className={classes.dialog} open={!!details} TransitionComponent={Transition}

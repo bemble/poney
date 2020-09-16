@@ -47,7 +47,7 @@ router.get('/:tableName/:id', async (req, res) => {
 // Add One
 router.post('/:tableName', async (req, res) => {
     const jsonQuery = {
-        $table: _.chain(req.params.tableName).camelCase().value(),
+        $table: _.chain(req.params.tableName).camelCase().lowerFirst().value(),
         $documents: req.body
     };
 
@@ -86,7 +86,7 @@ router.delete('/:tableName/:id', async (req, res) => {
     let field = (req.query.field ? req.query.field : false) || "id";
 
     const jsonQuery = {
-        $from: _.chain(req.params.tableName).camelCase().upperFirst().value(),
+        $from: _.chain(req.params.tableName).camelCase().value(),
         $where: {
             [field]: req.params.id
         }

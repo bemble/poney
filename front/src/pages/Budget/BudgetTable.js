@@ -86,7 +86,7 @@ export default React.memo((props) => {
         newLines[curIndex - 1] = lines[curIndex];
         newLines[curIndex] = lines[curIndex - 1];
         const newOrder = newLines.map(e => e.id);
-        Api.service(`budgets/reorder/${props.budgetId}`, {body: newOrder});
+        Api.service(`budgets/reorder/${props.budgetId}`, {method: "POST", body: newOrder});
         setLines(newLines);
     };
     const handleOnDownClicked = (id) => {
