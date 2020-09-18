@@ -1,11 +1,12 @@
 import React from 'react';
-import {Grid, Tabs, Tab} from "@material-ui/core";
+import {Grid, Card, Tabs, Tab} from "@material-ui/core";
 import TopRightLoading from "../../components/TopRightLoading";
 import Loading from "../../components/Loading";
 import AccountSettings from "./AccountSettings";
 
 import {ConfigurationContext} from "./Context";
 import DeferredCreditCardCalendar from "./DeferredCreditCardCalendar";
+import Users from "./Users";
 import SubTitle from "../../components/SubTitle";
 import Conf from "./Conf";
 import Api from "../../core/Api";
@@ -72,24 +73,30 @@ export default class Configuration extends React.Component {
                         textColor="primary"
                         aria-label="Configuration"
                         onChange={(e, currentPanel) => this.setState({currentPanel})}
+                        variant="scrollable"
+                        scrollButtons="auto"
                     >
                         <Tab label="Alertes"/>
                         <Tab label="Comptes"/>
+                        <Tab label="Utilisateurs"/>
                         {hasDeferredCard ? <Tab label="Débit différé"/> : null}
                     </Tabs>
                     <TopRightLoading visible={loadingCount > 0}/>
-                    <div hidden={currentPanel !== 0}>
+                    <Card hidden={currentPanel !== 0}>
                         <Conf label="Solde bas" id="WARNING_AMOUNT"/>
                         <Conf label="Solde bas pour les comptes épargne" id="WARNING_AMOUNT_SAVINGS"/>
-                    </div>
-                    <div hidden={currentPanel !== 1}>
+                    </Card>
+                    <Card hidden={currentPanel !== 1}>
                         <Grid item xs={12}>
                             <SubTitle>Écart initial</SubTitle>
                             <Conf label="Écart initial entre les comptes et l'application" id="ACCOUNTS_INITIAL_GAP"/>
                         </Grid>
                         <AccountSettings onChange={() => this.updateAccounts()}/>
-                    </div>
-                    <div hidden={currentPanel !== 2}>
+                    </Card>
+                    <Card hidden={currentPanel !== 2}>
+                        <Users />
+                    </Card>
+                    <Card hidden={currentPanel !== 3}>
                         <Grid container>
                             <Grid item xs={12}>
                                 <SubTitle>Jour de prélèvement</SubTitle>
@@ -104,7 +111,7 @@ export default class Configuration extends React.Component {
                                 <DeferredCreditCardCalendar/>
                             </Grid>
                         </Grid>
-                    </div>
+                    </Card>
                 </div> : null}
             </ConfigurationContext.Provider>
         </div>;

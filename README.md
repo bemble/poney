@@ -11,8 +11,11 @@ Used environment variables:
 
 - `LINXO_USERNAME`: Linxo username/email
 - `LINXO_PASSWORD`: Linxo password
-- `GOOGLE_SIGNIN_CLIENT_ID`: Google Signin Client ID
 - `ALLOWED_EMAILS`: list of emails allowed to use the app, comma separated
+- `PASSWORD_SALT`: salt used in passwords, if wanted to override default (strongly advised)
+- `JWT_SECRET`: secret used to generate JWT tokens, if wanted to override default (strongly advised)
+- `BASE_PATH`: base path, if Poney is reachable with a specific path (ie. not a dedicated URL)
+- `BROWSERLESS_HOST`: host of your browserless instance
 
 You can also set them in a `.env` file, placed in the `data` folder.
 

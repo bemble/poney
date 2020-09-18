@@ -1,32 +1,30 @@
 import React, {useEffect, useState} from "react";
-import {makeStyles} from "@material-ui/core";
+import {TextField, Button, makeStyles} from "@material-ui/core";
 import {pink, red} from "@material-ui/core/colors";
 import logo from './illustration.png';
+import jwtDecode from "jwt-decode";
 
-import GoogleLogin from 'react-google-login';
 import Api from "../../core/Api";
-import store from "../../AppStore";
+import store from "../../store";
 
 const useStyles = makeStyles(theme => ({
     root: {
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'center',
         background: `radial-gradient(circle farthest-corner at top left, ${pink[700]} 45%, ${red[700]} 95%)`,
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100vw',
-        height: 'calc(var(--vh, 1vh) * 100)'
+        height: 'calc(var(--vh, 1vh) * 100)',
+        paddingTop: '30%'
     },
     content: {
         width: 300,
-        height: 300,
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'space-between'
+        alignItems: 'center'
     },
     hr: {
         border: "none",
@@ -58,29 +56,107 @@ const useStyles = makeStyles(theme => ({
         width: "80%",
         color: "#FFFFFF",
         textAlign: "center"
+    },
+    form: {
+        marginTop: theme.spacing(8),
+        "& *": {
+            color: "#fff",
+        },
+        "& .MuiFormControl-root": {
+            marginBottom: theme.spacing(2)
+        },
+        "& .MuiInput-underline:before": {
+            borderBottomColor: `rgba(255,255,255,0.42)`
+        },
+        "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
+            borderBottomColor: `rgba(255,255,255,0.87)`
+        },
+        "& .MuiFormLabel-root.Mui-focused": {
+            color: `rgba(255,255,255,0.65)`
+        },
+        "& .MuiButton-root": {
+            borderColor: `rgba(255,255,255,0.42)`,
+            marginTop: theme.spacing(2),
+            float: "right"
+        }
+    },
+    error: {
+        background: `rgba(255,255,255,0.22)`,
+        color: "#FFF",
+        borderRadius: theme.spacing(0.5),
+        padding: `${theme.spacing()}px ${theme.spacing(2)}px`
     }
 }));
 
-export default React.memo((props) => {
+const tokenCallback = (data) => {
+    if (!!(data && data.access_token)) {
+        localStorage.setItem(Login.LS_REFRESH, data.refresh_token);
+        store.dispatch({type: "SET", token: data.access_token});
+        return true;
+    }
+    store.dispatch({type: "SET", token: null});
+    return false;
+};
+
+const refreshToken = async () => {
+    const refresh = localStorage.getItem(Login.LS_REFRESH);
+    if (refresh) {
+        const data = await Api.public(`auth/token`, {
+            headers: {
+                Authorization: `Bearer ${refresh}`
+            }
+        });
+        tokenCallback(data);
+    }
+};
+
+const Login = (props) => {
     const classes = useStyles();
     const [hasRequest, setHasRequest] = useState(false);
-    const googleClientId = store.getState().config.GOOGLE_SIGNIN_CLIENT_ID;
-
-    const onSuccess = async (response) => {
-        const {isAllowed, tokenId} = await Api.service(`auth/check`, {headers: {Authorization: `Bearer ${response.tokenId}`}});
-        if(!hasRequest) {
-            props.onReady && props.onReady();
-        }
-        if(isAllowed) {
-            props.onSuccess && props.onSuccess(tokenId);
-        }
-    };
+    const [email, setEmail] = useState(localStorage.getItem(Login.LS_EMAIL) || "");
+    const [password, setPassword] = useState("");
+    const [displayError, setDisplayError] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => {
+        store.subscribe(() => {
+            const {token} = store.getState().app;
+            if (token) {
+                const {exp} = jwtDecode(token);
+                const renewAfter = (exp - Math.round((new Date) / 1000) - 5 * 60) * 1000;
+                setTimeout(async () => {
+                    await refreshToken();
+                }, renewAfter);
+            }
+        });
+
+        (async () => {
+            await refreshToken();
             props.onReady && props.onReady();
-        }, 2000);
+        })();
     }, []);
+
+    const handleEmailChange = (e) => {
+        setEmail(e.target.value);
+        localStorage.setItem(Login.LS_EMAIL, e.target.value);
+    };
+
+    const handlePasswordChange = (e) => {
+        setPassword(e.target.value);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setDisplayError(false);
+        setHasRequest(true);
+        const data = await Api.public(`auth`, {
+            method: "post",
+            body: {email, password}
+        });
+        setHasRequest(false);
+        if (!tokenCallback(data)) {
+            setDisplayError(true);
+        }
+    };
 
     return <div className={classes.root}>
         <div className={classes.content}>
@@ -89,17 +165,33 @@ export default React.memo((props) => {
             <div className={classes.logoContainer}>
                 <img className={classes.logo} src={logo} alt="logo"/>
             </div>
-            <p className={classes.text}>Oups ! Pour aller plus loin je dois savoir qui tu es !</p>
-            <GoogleLogin
-                clientId={googleClientId}
-                theme="dark"
-                buttonText="Connexion"
-                isSignedIn={true}
-                onSuccess={onSuccess}
-                onFailure={(response) => console.error(response)}
-                onRequest={() => setHasRequest(true)}
-                cookiePolicy={'single_host_origin'}
-            />
+            <form className={classes.form} noValidate autoComplete="off" onSubmit={handleSubmit}>
+                {displayError ? <p className={classes.error}>Erreur lors de votre identification.</p> : null}
+                <TextField
+                    fullWidth
+                    disabled={hasRequest}
+                    id="user-email"
+                    label="Adresse e-mail"
+                    value={email}
+                    onChange={handleEmailChange}
+                />
+                <TextField
+                    fullWidth
+                    disabled={hasRequest}
+                    id="user-password"
+                    label="Mot de passe"
+                    type="password"
+                    inputProps={{pattern: "[0-9]*", inputMode: "numeric"}}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                />
+                <Button type="submit" variant="outlined" disabled={hasRequest}>Connexion</Button>
+            </form>
         </div>
     </div>
-});
+};
+Login.LS_EMAIL = "poney-email";
+Login.LS_REFRESH = "poney-refresh";
+
+export default React.memo(Login);

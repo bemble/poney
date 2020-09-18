@@ -8,8 +8,6 @@ module.exports = router;
 
 class Config {
     static getPublic() {
-        return {
-            GOOGLE_SIGNIN_CLIENT_ID: process.env.GOOGLE_SIGNIN_CLIENT_ID
-        };
+        return {};
     }
 }

@@ -1,4 +1,4 @@
-import store from "../AppStore";
+import store from "../store";
 
 class Api {
     static database(path, options = {}, queryParams = null) {
@@ -46,6 +46,10 @@ class Api {
         return Api.fetch(`/service/${serviceName}`, options, queryParams);
     }
 
+    static public(serviceName, options, queryParams = null) {
+        return Api.fetch(`/public/${serviceName}`, options, queryParams);
+    }
+
     static fetch(path, options = null, queryParams = null) {
         if (!options) {
             options = {};
@@ -61,7 +65,7 @@ class Api {
         }
 
         if (!path.startsWith("/public") && !options.headers.Authorization) {
-            options.headers["Authorization"] = `Bearer ${store.getState().token}`;
+            options.headers["Authorization"] = `Bearer ${store.getState().app.token}`;
         }
 
         let basePath = process.env.PUBLIC_URL;

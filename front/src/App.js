@@ -21,7 +21,7 @@ import {
 } from "@material-ui/core";
 import {pink, indigo} from "@material-ui/core/colors";
 
-import store from "./AppStore";
+import store from "./store";
 import Api from './core/Api';
 import Update from "./components/Update";
 
@@ -71,7 +71,7 @@ export default React.memo(() => {
 
     useEffect(() => {
         store.subscribe(() => {
-            const {token} = store.getState();
+            const {token} = store.getState().app;
             if (token && !isSignedId) {
                 setIsSignedIn(true);
             } else if (!token && isSignedId) {
@@ -80,16 +80,11 @@ export default React.memo(() => {
         });
 
         (async () => {
-            const config = await Api.fetch('/public/config');
-            store.dispatch({type: "SET", config});
+            const config = await Api.public('config');
+            store.dispatch({type: "SET_CONFIG", ...config});
             setIsInitialLoading(false);
         })();
     }, []);
-
-    const onLoadingSuccess = (token) => {
-        store.setToken(token);
-        setIsSignedIn(true);
-    };
 
     const links = [
         {to: "/", label: "Dashboard", icon: faTachometerAlt, exact: true},
@@ -111,7 +106,7 @@ export default React.memo(() => {
         <ThemeProvider theme={theme}>
             {isLoading || isInitialLoading ? <MainLoading/> : null}
             {isInitialLoading ? null : <div style={{background: theme.palette.background.default}}>
-                {!isSignedId ? <Login onSuccess={onLoadingSuccess} onReady={() => setIsLoading(false)}/> :
+                {!isSignedId ? <Login onReady={() => setIsLoading(false)}/> :
                     <div style={{minHeight: 'calc(var(--vh, 1vh) * 100)'}}>
                         <main className={classes.content}>
                             <Route path="/" exact component={Dashboard}/>

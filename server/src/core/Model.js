@@ -14,7 +14,7 @@ class Model {
 
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
         const db = await Database;
-        const [rows] = await db.query(query.sql, query.values);
+        const rows = await db.all(query.sql, query.values);
         return (rows || []).map(e => {
             if (Database.driverName === "mysql") {
                 Object.keys(e).forEach(key => {
@@ -51,7 +51,7 @@ class Model {
 
         return Model.getOne({
             $from: jsonQuery.$table,
-            $where: {id: insertId}
+            $where: {id: lastInsertId}
         });
     }
 
@@ -79,6 +79,6 @@ class Model {
     }
 }
 
-Model.AUTO_TIMESTAMPS_TABLES = ["budget", "budgetLine", "project", "projectLine", "rawData", "saving", "savingLine"];
+Model.AUTO_TIMESTAMPS_TABLES = ["budget", "budgetLine", "project", "projectLine", "rawData", "saving", "savingLine", "users"];
 
 module.exports = Model;

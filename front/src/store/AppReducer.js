@@ -1,11 +1,8 @@
-import {createStore} from 'redux';
-
 const initialState = {
-    token: "",
-    config: {}
+    token: ""
 };
 
-function appReducer(state = initialState, action) {
+export default function appReducer(state = initialState, action) {
     switch (action.type) {
         case "SET":
             const newValues = Object.assign({}, action);
@@ -14,11 +11,4 @@ function appReducer(state = initialState, action) {
         default:
             return state;
     }
-}
-
-const store = createStore(appReducer);
-store.setToken = (token) => {
-    store.dispatch({type: "SET", token});
 };
-
-export default store;

@@ -1,12 +1,10 @@
-import {createStore} from 'redux';
-
 const initialState = {
     serviceWorkerInitialized: false,
     serviceWorkerUpdated: false,
     serviceWorkerRegistration: null,
 };
 
-function updateReducer(state = {}, action) {
+export default function updateReducer(state = initialState, action) {
     switch (action.type) {
         case "SW_INIT":
             return {
@@ -22,7 +20,4 @@ function updateReducer(state = {}, action) {
         default:
             return state;
     }
-}
-
-const store = createStore(updateReducer, initialState);
-export default store;
+};

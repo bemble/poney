@@ -1,6 +1,6 @@
 const router = require('express').Router();
-
-const jwtDecode = require('jwt-decode');
+const {Tools} = require('../core');
+const jwt = require('jsonwebtoken');
 
 const userCheck = (req, res, next) => {
     try {
@@ -8,11 +8,8 @@ const userCheck = (req, res, next) => {
         if (!bearer) {
             throw new Error("No token");
         }
-
-        const decodedToken = jwtDecode(bearer.replace(/bearer\s+/i, ''));
-        if (process.env.ALLOWED_EMAILS.split(',').indexOf(decodedToken.email) < 0) {
-            throw new Error("Not allowed");
-        }
+        const token = bearer.replace(/bearer\s+/i, '');
+        jwt.verify(token, Tools.getJwtSecret(), {issuer: "Poney", audience: "resources:access"});
 
         next();
     } catch (e) {
@@ -21,7 +18,7 @@ const userCheck = (req, res, next) => {
 };
 
 
-["config"].forEach(publicApi => {
+["auth", "config"].forEach(publicApi => {
     router.use(`/public/${publicApi}`, require(`./${publicApi}`));
 });
 router.use('/database', userCheck, require('./database'));

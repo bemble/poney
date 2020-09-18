@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {Button, Snackbar} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import store from "../UpdateStore";
+import store from "../store";
 
 const useStyles = makeStyles(theme => ({
     root: {

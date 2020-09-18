@@ -3,11 +3,12 @@
   "scripts": {
     "start": "node src/index.js",
     "prestart": "db-migrate up --config ../data/database.json && npm run prestart:scripts",
-    "prestart:scripts": "npm run prestart:setBasePath && npm run prestart:sqliteToMySQL && npm run prestart:handleCalendar && npm run prestart:handleStickybatchs",
+    "prestart:scripts": "npm run prestart:setBasePath && npm run prestart:sqliteToMySQL && npm run prestart:handleCalendar && npm run prestart:handleStickybatchs && npm run prestart:createUsers",
     "prestart:setBasePath": "node scripts/set-base-path-front.js",
     "prestart:handleCalendar": "node scripts/launch-batch.js credit-card-calendar",
     "prestart:handleStickybatchs": "node scripts/launch-batch.js reset-batchs-status",
     "prestart:sqliteToMySQL": "node scripts/sqlite-to-mysql.js",
+    "prestart:createUsers": "node scripts/create-users.js",
     "prestart:dev": "db-migrate up --config ../data/database.json && npm run prestart:handleCalendar",
     "start:dev": "APP_ENVIRONMENT=dev nodemon src/index.js"
   },
@@ -24,14 +25,15 @@
     "http-proxy-middleware": "^0.20.0",
     "iconv-lite": "^0.6.2",
     "json-sql-builder2": "^1.0.24",
-    "jwt-decode": "^2.2.0",
+    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "mysql2": "^2.1.0",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
     "sha1": "^1.1.1",
-    "sqlite": "^3.0.3"
+    "sqlite": "^3.0.3",
+    "uuid": "^8.3.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.2"
