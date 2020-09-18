@@ -24,6 +24,7 @@ exports.up = async function (db) {
         updatedAt: 'timestamp'
     });
     await db.addIndex('users', 'email-index', 'email');
+    await db.addIndex('users', 'publicId-index', 'publicId');
 };
 
 exports.down = async function (db) {

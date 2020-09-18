@@ -10,6 +10,7 @@ import Users from "./Users";
 import SubTitle from "../../components/SubTitle";
 import Conf from "./Conf";
 import Api from "../../core/Api";
+import About from "./About";
 
 export default class Configuration extends React.Component {
     constructor(props) {
@@ -78,8 +79,9 @@ export default class Configuration extends React.Component {
                     >
                         <Tab label="Alertes"/>
                         <Tab label="Comptes"/>
-                        <Tab label="Utilisateurs"/>
                         {hasDeferredCard ? <Tab label="Débit différé"/> : null}
+                        <Tab label="Utilisateurs"/>
+                        <Tab label="A propos"/>
                     </Tabs>
                     <TopRightLoading visible={loadingCount > 0}/>
                     <Card hidden={currentPanel !== 0}>
@@ -93,10 +95,7 @@ export default class Configuration extends React.Component {
                         </Grid>
                         <AccountSettings onChange={() => this.updateAccounts()}/>
                     </Card>
-                    <Card hidden={currentPanel !== 2}>
-                        <Users />
-                    </Card>
-                    <Card hidden={currentPanel !== 3}>
+                    {hasDeferredCard ? <Card hidden={currentPanel !== 2}>
                         <Grid container>
                             <Grid item xs={12}>
                                 <SubTitle>Jour de prélèvement</SubTitle>
@@ -104,13 +103,20 @@ export default class Configuration extends React.Component {
                             </Grid>
                             <Grid item xs={12}>
                                 <SubTitle>Écart initial</SubTitle>
-                                <Conf label="Écart initial dans le montant de carte bancaire" id="DEFERREDCB_INITIAL_GAP"/>
+                                <Conf label="Écart initial dans le montant de carte bancaire"
+                                      id="DEFERREDCB_INITIAL_GAP"/>
                             </Grid>
                             <Grid item xs={12}>
                                 <SubTitle>Fin d'exercice (jour inclus)</SubTitle>
                                 <DeferredCreditCardCalendar/>
                             </Grid>
                         </Grid>
+                    </Card> : null}
+                    <Card hidden={currentPanel !== (2 + (hasDeferredCard ? 1 : 0))}>
+                        <Users/>
+                    </Card>
+                    <Card hidden={currentPanel !== (3 + (hasDeferredCard ? 1 : 0))}>
+                        <About />
                     </Card>
                 </div> : null}
             </ConfigurationContext.Provider>
