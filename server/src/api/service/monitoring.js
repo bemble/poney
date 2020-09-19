@@ -13,6 +13,9 @@ router.get('/details', async (req, res) => {
 router.get('/totals', async (req, res) => {
     res.json(await Monitoring.getTotals());
 });
+router.get('/latest', async (req, res) => {
+    res.json(await Monitoring.getLatest());
+});
 
 module.exports = router;
 
@@ -27,6 +30,16 @@ class Monitoring {
         return api.getAggregatedData();
     }
 
+    static async getLatest() {
+        const db = await Database;
+        const conditions = await Accounts.conditions();
+        const queryConditions = [...conditions.checks, ...conditions.deferredCard];
+        return db.all(`SELECT * FROM rawData
+                        WHERE (${queryConditions.join(' OR ')})
+                        ORDER BY \`date\` DESC
+                        LIMIT 10`);
+    }
+
     static async getTotals() {
         const db = await Database;
         const conditions = await Accounts.conditions();
@@ -38,7 +51,7 @@ class Monitoring {
 
         const hasDeferredCard = !!(await Accounts.conditions()).deferredCard.length;
         if (hasDeferredCard) {
-            const amountWWithoutLevys= (await db.get(`SELECT SUM(amount) as amount
+            const amountWWithoutLevys = (await db.get(`SELECT SUM(amount) as amount
                                       FROM rawData
                         WHERE (${conditions.checks.join(' OR ')})
                         AND category != "Prél. carte débit différé"`)).amount;

@@ -21,9 +21,6 @@ const useStyles = makeStyles(theme => {
                 padding: 0,
                 color: "#FFFFFF"
             }
-        },
-        test: {
-            background: theme.palette.success.main
         }
     }
 });
@@ -67,7 +64,7 @@ export default function HealthGraph(props) {
 
     const classes = useStyles();
     const FlexibleXYPlot = makeWidthFlexible(XYPlot);
-    return <FlexibleXYPlot height={250} yDomain={[domain.min, domain.max]}
+    return <FlexibleXYPlot height={200} yDomain={[domain.min, domain.max]}
                            colorType="literal" margin={{left: 50, bottom: 50}}>
         <XAxis tickFormat={v => moment.utc(v, 'X').format('DD/MM/YY')}
                style={{line: {stroke: "none"}}} tickLabelAngle={-45}/>

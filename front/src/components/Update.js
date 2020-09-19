@@ -20,7 +20,7 @@ export default React.memo(() => {
 
     useEffect(() => {
         const unregister = store.subscribe(() => {
-            const {serviceWorkerInitialized, serviceWorkerUpdated, serviceWorkerRegistration} = store.getState();
+            const {serviceWorkerInitialized, serviceWorkerUpdated, serviceWorkerRegistration} = store.getState().update;
             setIsInitialized(serviceWorkerInitialized);
             setIsUpdated(serviceWorkerUpdated);
             setRegistration(serviceWorkerRegistration);

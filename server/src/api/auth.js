@@ -51,7 +51,7 @@ class Auth {
             audience: "resources:access"
         });
         const refresh_token = jwt.sign({publicId: user.publicId}, Tools.getJwtSecret(), {
-            expiresIn: "5d",
+            expiresIn: "6h",
             issuer: "Poney",
             audience: "auth:renew-token"
         });

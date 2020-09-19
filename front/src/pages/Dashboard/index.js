@@ -6,8 +6,9 @@ import Balance from "./Summary/Balance";
 import {faMoneyCheckAlt, faPiggyBank} from "@fortawesome/free-solid-svg-icons";
 import {useHistory} from "react-router-dom";
 
-import AccountWeather from "./AccountWeather";
 import Budget from "./Budget";
+import LatestOperations from "./LatestOperations";
+import AccountWeather from "./AccountWeather";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -83,6 +84,9 @@ export default React.memo((props) => {
             </Grid>
             <Grid item xs={12}>
                 <Budget />
+            </Grid>
+            <Grid item xs={12}>
+                <LatestOperations />
             </Grid>
             <Grid item xs={12}>
                 <AccountWeather lastSynchUpdate={(lastSynch && lastSynch.runnedAt) || 0} warning={warning}/>

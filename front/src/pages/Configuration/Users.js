@@ -25,7 +25,7 @@ export default React.memo(() => {
 
     return <div>
         <List>
-            {users.map(user => <ListItem>
+            {users.map(user => <ListItem key={user.publicId}>
                 <ListItemText primary={user.email}/>
                 <ListItemSecondaryAction>
                     <IconButton edge="end" aria-label="Editer" onClick={() => setEdit(user)}>

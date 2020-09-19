@@ -4,7 +4,7 @@ import './index.css';
 import '../node_modules/react-vis/dist/style.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-//import store from "./store";
+import store from "./store";
 
 const updateVh = () => {
     let vh = window.innerHeight * 0.01;
@@ -15,8 +15,8 @@ updateVh();
 
 ReactDOM.render(<App/>, document.getElementById('root'));
 
-/*serviceWorker.register({
+serviceWorker.register({
     onSuccess: () => store.dispatch({type: "SW_INIT"}),
     onUpdate: reg => store.dispatch({type: "SW_UPDATE", payload: reg}),
-});*/
+});
 serviceWorker.unregister();
