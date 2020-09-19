@@ -17,7 +17,6 @@ Object.entries(MaterialColors).forEach(([name, color]) => {
 const useStyles = makeStyles(theme => ({
     root: {
         background: MaterialColors.grey[500],
-        maxWidth: 130,
         textAlign: 'center',
         padding: 16,
         color: "#FFF",

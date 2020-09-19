@@ -1,19 +1,12 @@
 import React, {useState, useEffect} from "react";
 import Header from "../../components/Header";
-import {faBalanceScale, faNotEqual, faTimesCircle, faUmbrellaBeach} from "@fortawesome/free-solid-svg-icons";
+import {faBalanceScale, faUmbrellaBeach} from "@fortawesome/free-solid-svg-icons";
 import {Add as AddIcon} from "@material-ui/icons";
 import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
     Fab,
     Grid,
-    ListItemText,
-    makeStyles,
-    MenuItem, Slide, Table, TableBody, TableCell, TableRow,
-    TextField,
-    useMediaQuery,
-    useTheme
+    Paper,
+    makeStyles
 } from "@material-ui/core";
 import AddAmount from "./AddAmount";
 import {useLocation, useHistory} from "react-router-dom";
@@ -21,10 +14,12 @@ import MomentUtils from "@date-io/moment";
 import moment from "moment";
 import {DatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import SavingTable from "./SavingTable";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {formatNumber} from "../../core/Tools";
-import {blue, green, indigo, red} from "@material-ui/core/colors";
+import {blue, amber} from "@material-ui/core/colors";
 import Api from "../../core/Api";
+
+import DetailsDialog from "./DetailsDialog";
+import EditDetailsDialog from "./EditDetailsDialog";
 
 const useStyles = makeStyles(theme => ({
     tools: {
@@ -40,42 +35,25 @@ const useStyles = makeStyles(theme => ({
         paddingRight: theme.spacing(2),
         marginBottom: 80
     },
-    dialog: {
-        top: '10vh !important',
-        maxWidth: 600,
-        margin: "0 auto"
+    difference: {
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(),
+        border: `1px solid ${amber[500]}`,
     },
-    dialogTitle: {
-        color: "#FFF",
-        background: `radial-gradient(circle farthest-corner at top left, ${indigo[700]} 0%, ${blue[700]} 57%)`,
-        "& *": {
-            fontWeight: 400
-        },
-        "& svg": {
-            position: "absolute",
-            right: 16,
-            top: 18
-        }
-    },
-    income: {
-        color: green[800]
-    },
-    expense: {
-        color: red[800]
+    differenceAmount: {
+        fontFamily: "monospace",
+        fontSize: 14,
+        fontWeight: "bold"
     }
 }));
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} mountOnEnter unmountOnExit/>;
-});
 
 export default React.memo(() => {
     const [amounts, setAmounts] = useState();
     const [showAddAmount, setShowAddAmount] = useState(useLocation().pathname.indexOf("/ajout-montant") >= 0);
-    const [startDate, setStartDate] = useState(moment());
+    const [startDate, setStartDate] = useState(moment.utc());
     const [savings, setSavings] = useState([]);
-    const [savingId, setSavingId] = useState();
     const [lineDetails, setLineDetails] = useState(null);
+    const [editLine, setEditLine] = useState(null);
     const [amountProjects, setAmountProjects] = useState(0);
 
     const updateSavingTotals = async () => {
@@ -87,7 +65,6 @@ export default React.memo(() => {
         (async () => {
             const savings = await Api.list(`saving`);
             setSavings(savings);
-            setSavingId(savings[0].id);
             setAmountProjects((await Api.service(`projects/remaining`)).amount);
 
             await updateSavingTotals();
@@ -95,11 +72,12 @@ export default React.memo(() => {
 
         const start = moment.utc();
         start.set({hour: 0, minute: 0, second: 0, millisecond: 0});
-        start.subtract(8, 'months');
+        start.subtract(1, 'months');
         setStartDate(start);
     }, []);
 
     const data = [];
+    let difference = 0;
     if (amounts) {
         data.push({
             title: "Compte courant",
@@ -109,16 +87,6 @@ export default React.memo(() => {
             content: amounts.real
         });
 
-        if (Math.abs(amounts.real - amounts.inApp) > 0.01) {
-            data.push({
-                title: `Différence (${(amounts.real > amounts.inApp) ? "plus dans compte" : "plus de l'app"})`,
-                isAmount: true,
-                color: "blueGrey",
-                icon: faNotEqual,
-                content: Math.abs(amounts.real - amounts.inApp)
-            });
-        }
-
         data.push({
             title: "Montant nécessaire pour concrétiser les projets",
             isAmount: true,
@@ -126,6 +94,7 @@ export default React.memo(() => {
             icon: faUmbrellaBeach,
             content: amountProjects
         });
+        difference = amounts.real - amounts.inApp;
     }
 
     const classes = useStyles();
@@ -136,6 +105,7 @@ export default React.memo(() => {
         setShowAddAmount(true);
     };
     const handleAddExpenseClose = async (newSavingCreated) => {
+        setEditLine(null);
         history.push(`/comptes-epargne`);
         setShowAddAmount(false);
 
@@ -144,15 +114,17 @@ export default React.memo(() => {
         setStartDate(moment(startDate));
     };
 
-    const theme = useTheme();
-    const isXsScreen = useMediaQuery(theme.breakpoints.only("xs"));
-
     return <div>
         {data.length ? <Header data={data}/> : null}
+        {Math.floor(difference) !== 0 ? <Paper className={classes.difference}>
+            Difference : <span className={classes.differenceAmount}>{formatNumber(Math.abs(difference))}</span>
+            &nbsp;de plus {difference > 0 ? " sur le compte" : " dans l'application"}.
+        </Paper> : null}
         <MuiPickersUtilsProvider utils={MomentUtils} moment={moment} locale={"fr"}>
             <Grid container spacing={1} style={{padding: "0 16px"}}>
-                <Grid item xs={6} sm={3}>
+                <Grid item xs={12}>
                     <DatePicker
+                        fullWidth
                         variant="inline"
                         openTo="month"
                         views={["year", "month"]}
@@ -164,53 +136,18 @@ export default React.memo(() => {
                         autoOk={true}
                     />
                 </Grid>
-                {isXsScreen ? <Grid item xs={6}>
-                    <TextField fullWidth select label="Catégorie" value={savingId}
-                               onChange={(e) => setSavingId(e.target.value)}>
-                        {savings.map(({label, id}) => <MenuItem key={id} value={id}>
-                            <ListItemText primary={label}/>
-                        </MenuItem>)}
-                    </TextField>
-                </Grid> : null}
             </Grid>
         </MuiPickersUtilsProvider>
         <Grid container spacing={2} className={classes.tables}>
-            {savings.filter(saving => !isXsScreen || saving.id === savingId).map(saving => <Grid item xs={12} sm={6}
-                                                                                                 md={4} key={saving.id}>
-                <SavingTable saving={saving} from={startDate} onLineSelect={(details) => setLineDetails(details)}/>
+            {savings.map(saving => <Grid item xs={12} sm={6}
+                                         md={4} key={saving.id}>
+                <SavingTable saving={saving} from={startDate}
+                             onLineSelect={(details) => setLineDetails(details)}
+                             onEditLineSelect={(line) => setEditLine(line)}/>
             </Grid>)}
         </Grid>
-        <Dialog fullScreen open={lineDetails !== null} className={classes.dialog} onClose={() => setLineDetails(null)}
-                TransitionComponent={Transition}>
-            <DialogTitle className={classes.dialogTitle}>
-                Détails
-                <FontAwesomeIcon icon={faTimesCircle} onClick={() => setLineDetails(null)}/>
-            </DialogTitle>
-            {lineDetails ? <DialogContent>
-                <h4>{lineDetails.label}</h4>
-                <Table>
-                    <TableBody>
-                        <TableRow>
-                            <TableCell className={classes.cell}>Revenus</TableCell>
-                            <TableCell align="right" className={classes.income}>
-                                {formatNumber(lineDetails.amountIncomes || 0)}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>Dépenses</TableCell>
-                            <TableCell align="right" className={classes.expense}>
-                                {formatNumber(lineDetails.amountExpenses || 0)}
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-                {lineDetails.comment ? <div>
-                    <h5>Commentaires</h5>
-                    <ul className={classes.list}>{(lineDetails.comment || "").split("\n").map(c =>
-                        <li>{c}</li>)}</ul>
-                </div> : null}
-            </DialogContent> : null}
-        </Dialog>
+        <DetailsDialog lineDetails={lineDetails} onClose={() => setLineDetails(null)}/>
+        <EditDetailsDialog line={editLine} onClose={handleAddExpenseClose}/>
         <AddAmount visible={showAddAmount} onClose={handleAddExpenseClose}/>
         <Fab aria-label="Créer un nouveau projet" className={classes.fab} color="primary"
              onClick={() => handleAddExpenseOpen()}>

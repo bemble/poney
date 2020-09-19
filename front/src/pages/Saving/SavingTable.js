@@ -2,12 +2,12 @@ import React, {useEffect, useState} from "react";
 import {Table, TableHead, TableRow, TableCell, TableBody, makeStyles} from "@material-ui/core";
 import {formatNumber} from "../../core/Tools";
 import moment from "moment";
-import {blueGrey, green, grey, red} from "@material-ui/core/colors";
+import {blueGrey, green, red} from "@material-ui/core/colors";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faInfoCircle} from "@fortawesome/free-solid-svg-icons";
+import {faEdit} from "@fortawesome/free-solid-svg-icons";
 import Api from "../../core/Api";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     table: {
         "& td": {
             padding: "6px 12px 6px 8px"
@@ -15,6 +15,9 @@ const useStyles = makeStyles({
         "& td:last-child": {
             paddingRight: "8px"
         }
+    },
+    head: {
+        color: "rgba(0,0,0,0.72)"
     },
     ok: {
         background: blueGrey[50],
@@ -27,18 +30,18 @@ const useStyles = makeStyles({
     tools: {
         width: 20,
         fontSize: 18,
-        color: grey[300]
+        color: theme.palette.type === "light" ? blueGrey[300] : blueGrey[500]
     },
     income: {
-        color: blueGrey[900]
+        color: theme.palette.type === "light" ? blueGrey[900] : blueGrey[100]
     },
     expense: {
-        color: red[900]
+        color: theme.palette.type === "light" ? red[900] : red[200]
     },
     noData: {
-        color: blueGrey[100]
+        color: theme.palette.type === "light" ? blueGrey[100] : blueGrey[600]
     }
-});
+}));
 
 export default React.memo((props) => {
     const [months, setMonths] = useState([]);
@@ -74,7 +77,14 @@ export default React.memo((props) => {
     }, [props.from]);
 
     const handleShowInfo = (month, details) => {
+        month = moment(month, "YYYY-MM").format("MM/YYYY");
         props.onLineSelect && props.onLineSelect({
+            label: props.saving.label + ', ' + month,
+            ...details
+        });
+    };
+    const handleEdit = (month, details) => {
+        props.onEditLineSelect && props.onEditLineSelect({
             label: props.saving.label + ', ' + month,
             ...details
         });
@@ -85,7 +95,7 @@ export default React.memo((props) => {
     return <Table size="small" className={classes.table}>
         <TableHead>
             <TableRow>
-                <TableCell colSpan={4} align="center"
+                <TableCell colSpan={4} align="center" className={classes.head}
                            style={{background: props.saving.color}}>
                     {props.saving.label}
                 </TableCell>
@@ -97,15 +107,24 @@ export default React.memo((props) => {
         </TableHead>
         <TableBody>
             {months.map((month, i) => <TableRow key={month}>
-                <TableCell
-                    style={{fontWeight: i === 0 ? "bold" : "normal"}}>{moment(month, "YYYY-MM").format("MM/YYYY")}</TableCell>
+                <TableCell style={{fontWeight: i === 0 ? "bold" : "normal"}}
+                           onClick={() => lines[month] && lines[month].comment && handleShowInfo(month, lines[month])}>
+                    {moment(month, "YYYY-MM").format("MM/YYYY")}
+                </TableCell>
                 <TableCell align="right"
-                           className={lines[month] && lines[month].amountIncomes ? classes.income : classes.noData}>{formatNumber(lines[month] ? lines[month].amountIncomes : 0)}</TableCell>
+                           className={lines[month] && lines[month].amountIncomes ? classes.income : classes.noData}
+                           onClick={() => lines[month] && lines[month].comment && handleShowInfo(month, lines[month])}>
+                    {formatNumber(lines[month] ? lines[month].amountIncomes : 0)}
+                </TableCell>
                 <TableCell align="right"
-                           className={lines[month] && lines[month].amountExpenses ? classes.expense : classes.noData}>{formatNumber(lines[month] ? lines[month].amountExpenses : 0)}</TableCell>
+                           className={lines[month] && lines[month].amountExpenses ? classes.expense : classes.noData}
+                           onClick={() => lines[month] && lines[month].comment && handleShowInfo(month, lines[month])}>
+                    {formatNumber(lines[month] ? lines[month].amountExpenses : 0)}
+                </TableCell>
                 <TableCell className={classes.tools}>{lines[month] && lines[month].comment ?
-                    <FontAwesomeIcon icon={faInfoCircle}
-                                     onClick={() => handleShowInfo(moment(month, "YYYY-MM").format("MM/YYYY"), lines[month])}/> : null}</TableCell>
+                    <FontAwesomeIcon icon={faEdit}
+                                     onClick={() => handleEdit(moment(month, "YYYY-MM").format("MM/YYYY"), lines[month])}/> : null}
+                </TableCell>
             </TableRow>)}
         </TableBody>
     </Table>
