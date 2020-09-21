@@ -130,7 +130,6 @@ class Budgets {
         }
 
         const conditions = await Accounts.conditions();
-
         const conditionDeferredCard = conditions.deferredCard ? `OR (${conditions.deferredCard.join(' OR ')})` : "";
         const rawData = (await db.all(`SELECT category, SUM(amount) AS total
                                       FROM rawData

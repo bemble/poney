@@ -28,7 +28,15 @@ class Projects {
                                FROM projectLine pl
                                WHERE pl.idProject = p.id)                                           AS expected
                        FROM project p
-                       ORDER BY p.hidden ASC, p.endAt DESC, p.addedAt DESC`);
+                       ORDER BY p.hidden ASC, p.endAt DESC, p.addedAt DESC`)
+            .then(summaries => {
+                summaries.forEach(s => {
+                    s.endAt = Database.dbDateToUnix(s.endAt);
+                    s.addedAt = Database.dbDateToUnix(s.addedAt);
+                    s.updatedAt = Database.dbDateToUnix(s.updatedAt);
+                });
+                return summaries;
+            });
     }
 
     static async remaining() {

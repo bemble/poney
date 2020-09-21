@@ -8,6 +8,8 @@ module.exports = router;
 
 class Config {
     static getPublic() {
-        return {};
+        return {
+            apiVersion: process.env.APP_ENVIRONMENT !== "dev" ? require("../../package").version : "dev"
+        };
     }
 }
