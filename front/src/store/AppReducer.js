@@ -1,14 +1,17 @@
+import produce from "immer";
+
 const initialState = {
     token: ""
 };
 
-export default function appReducer(state = initialState, action) {
-    switch (action.type) {
-        case "SET":
-            const newValues = Object.assign({}, action);
-            delete newValues.type;
-            return Object.assign({}, state, newValues);
-        default:
-            return state;
-    }
+export default function projectReducer(state = initialState, {type, app}) {
+    return produce(state, draft => {
+        if (!app) return;
+        switch (type) {
+            case "SET":
+                Object.keys(app).forEach(k => draft[k] = app[k]);
+                break;
+            default:
+        }
+    });
 };

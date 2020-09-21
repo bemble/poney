@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
         margin: theme.spacing(2)
     },
     heading: {
-        color: "rgba(0,0,0,0.57)"
+        color: theme.palette.type === "light" ? "rgba(0,0,0,0.57)" : "rgba(255,255,255,0.57)"
     },
     tools: {
         padding: theme.spacing(1)

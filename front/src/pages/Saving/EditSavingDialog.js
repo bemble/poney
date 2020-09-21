@@ -62,8 +62,6 @@ export default React.memo((props) => {
     const [color, setColor] = useState("transparent");
     const [label, setLabel] = useState("");
 
-    const [displayPicker, setDisplayPicker] = useState(false);
-
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
@@ -72,7 +70,6 @@ export default React.memo((props) => {
     useEffect(() => {
         (async () => {
             setBudgetLines(await Api.service(`savings/budget_lines`));
-            setDisplayPicker(false);
             if (props.saving) {
                 setIdBudgetLine(props.saving.idBudgetLine);
                 setColor(props.saving.color);
@@ -83,7 +80,6 @@ export default React.memo((props) => {
 
     const handleColorChange = ({hex}) => {
         setColor(hex);
-        setDisplayPicker(false);
     };
 
     const handleClose = () => {

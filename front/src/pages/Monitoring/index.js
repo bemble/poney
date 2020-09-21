@@ -21,6 +21,7 @@ import {Search as SearchIcon, Close as CloseIcon} from "@material-ui/icons";
 import Api from "../../core/Api";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCreditCard, faLongArrowAltDown, faLongArrowAltUp, faTag} from "@fortawesome/free-solid-svg-icons";
+import SlideUpTransition from "../../components/SlideUpTransition";
 
 const styles = theme => ({
     tools: {
@@ -100,10 +101,6 @@ const styles = theme => ({
     detailsDeferredDebitCreditCard: {
         background: blue[500]
     }
-});
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} mountOnEnter unmountOnExit/>;
 });
 
 class Suivi extends React.PureComponent {
@@ -193,7 +190,7 @@ class Suivi extends React.PureComponent {
                 </TableBody>
             </Table> : null}
 
-            <Dialog fullScreen className={classes.dialog} open={!!details} TransitionComponent={Transition}
+            <Dialog fullScreen className={classes.dialog} open={!!details} TransitionComponent={SlideUpTransition}
                     onClose={closeDetails}>
                 <AppBar className={classes.appBar}>
                     <Toolbar>

@@ -41,9 +41,9 @@ class Projects {
     static async getTotals(id) {
         const db = await Database;
         return db.get(`SELECT
-                         SUM(amount)            AS Amount,
-                         SUM(expectedAmount)    AS Expected,
-                         SUM(alreadyPaidAmount) AS AlreadyPaid
+                         SUM(amount)            AS amount,
+                         SUM(expectedAmount)    AS expected,
+                         SUM(alreadyPaidAmount) AS alreadyPaid
                        FROM projectLine
                        WHERE idProject = ?`, [id])
     }

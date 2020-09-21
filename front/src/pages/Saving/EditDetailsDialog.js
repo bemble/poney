@@ -10,6 +10,7 @@ import {faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 import React, {useState, useEffect} from "react";
 import {blue, green, indigo, red} from "@material-ui/core/colors";
 import Api from "../../core/Api";
+import SlideUpTransition from "../../components/SlideUpTransition";
 
 const useStyles = makeStyles(theme => ({
     dialog: {
@@ -36,10 +37,6 @@ const useStyles = makeStyles(theme => ({
         color: red[800]
     }
 }));
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} mountOnEnter unmountOnExit/>;
-});
 
 export default React.memo((props) => {
     const [isSaving, setIsSaving] = useState(false);
@@ -69,7 +66,7 @@ export default React.memo((props) => {
     const classes = useStyles();
 
     return <Dialog fullScreen open={props.line !== null} className={classes.dialog}
-                   TransitionComponent={Transition}>
+                   TransitionComponent={SlideUpTransition}>
         <DialogTitle className={classes.dialogTitle}>
             Edition
             {!isSaving ? <FontAwesomeIcon icon={faTimesCircle} onClick={handleClose}/> : null}

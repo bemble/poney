@@ -49,19 +49,21 @@ export default React.memo(() => {
 
     useEffect(() => {
         setAddExpenseProjectId(projectId);
-        load(true);
+        (async () => {
+            await load(true);
+        })();
     }, [projectId]);
 
     const handleDelete = async (id) => {
         await Api.delete(`project`, id);
-        load();
+        await load();
     };
 
     const handleClose = async (saved) => {
         setEdit(null);
         setDisplayDialog(false);
         if (saved) {
-            load();
+            await load();
         }
     };
 

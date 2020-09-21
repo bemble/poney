@@ -27,6 +27,7 @@ import {Close as CloseIcon} from "@material-ui/icons";
 import {blue, indigo} from "@material-ui/core/colors";
 
 import "./Visualize.scss";
+import SlideUpTransition from "../../components/SlideUpTransition";
 
 const useStyles = makeStyles(theme => ({
     barContainer: {
@@ -121,10 +122,6 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} mountOnEnter unmountOnExit/>;
-});
-
 export default React.memo((props) => {
     const [isLoading, setIsLoading] = useState(true);
     const [usage, setUsage] = useState({});
@@ -197,7 +194,7 @@ export default React.memo((props) => {
                 <span>{formatNumber(usage[k].total)}{usage[k].expected ? "/" + formatNumber(usage[k].expected) : ""}</span>
             </div>
         </div>)}
-        <Dialog fullScreen className={classes.dialog} open={!!details} TransitionComponent={Transition}
+        <Dialog fullScreen className={classes.dialog} open={!!details} TransitionComponent={SlideUpTransition}
                 onClose={closeDetails}>
             <AppBar className={classes.appBar}>
                 <Toolbar>

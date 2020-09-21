@@ -1,8 +1,9 @@
 import {IconButton, makeStyles} from "@material-ui/core";
-import React, {useEffect, useState} from "react";
-import {deleteLine} from "./core";
+import React from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
+import Api from "../../../core/Api";
+import store from "../../../store";
 
 const useStyle = makeStyles(theme => ({
     tools: {
@@ -24,25 +25,24 @@ const useStyle = makeStyles(theme => ({
 export default React.memo((props) => {
     const classes = useStyle();
 
-    const [id, setId] = useState(props.id);
-    const [initialId] = useState(props.initialId);
-
-    useEffect(() => {
-        if (props.id !== id) {
-            setId(props.id);
+    const handleDelete = async () => {
+        await Api.delete(`project_line`, props.id);
+        const index = store.getState().project.lines.findIndex(l => l.id === props.id);
+        if (index >= 0) {
+            store.dispatch({type: "DELETE", project: {lines: index}});
         }
-    }, [props.id]);
+        props.onDeleted && props.onDeleted(props.id);
+    };
 
-    const deleteCurrentLine = async () => {
-        await deleteLine(id);
-        props.onDeleted && props.onDeleted(initialId)
+    const handleEdit = () => {
+        store.dispatch({type: "SET", project: {editLineId: props.id}});
     };
 
     return <div className={classes.tools}>
-        <IconButton aria-label="Editer" className={classes.tool} onClick={() => props.onEdit && props.onEdit()}>
+        <IconButton aria-label="Editer" className={classes.tool} onClick={handleEdit}>
             <FontAwesomeIcon icon={faEdit}/>
         </IconButton>
-        <IconButton aria-label="Supprimer" onClick={deleteCurrentLine} className={classes.tool}>
+        <IconButton aria-label="Supprimer" onClick={handleDelete} className={classes.tool}>
             <FontAwesomeIcon icon={faTrash}/>
         </IconButton>
     </div>;

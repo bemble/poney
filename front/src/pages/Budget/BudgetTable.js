@@ -8,7 +8,7 @@ import {
     TableRow, IconButton
 } from "@material-ui/core";
 import BudgetLine from "./BudgetLine";
-import store from "./Store";
+import store from "../../store";
 import {faExchangeAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Api from "../../core/Api";
@@ -58,7 +58,8 @@ export default React.memo((props) => {
             newLines.splice(index, 1);
             setLines(newLines);
         }
-        store.refreshFromDatabase(props.budgetId);
+        const counts = await Api.service(`budgets/totals/${id}`);
+        store.dispatch({type: "SET", budget: counts});
     };
 
     const handleOnCreated = async (id, newId) => {

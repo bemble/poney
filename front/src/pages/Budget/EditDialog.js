@@ -27,7 +27,7 @@ import {BlockPicker} from "react-color";
 import {makeStyles} from "@material-ui/core/styles";
 import {operationKinds, linxoCategories} from "./BudgetLine/core";
 import Api from "../../core/Api";
-import store from "./Store";
+import store from "../../store";
 
 const useStyles = makeStyles(theme => ({
     dialog: {
@@ -103,8 +103,11 @@ export default React.memo((props) => {
                 dayOfMonth: parseInt("" + dayOfMonth), color
             });
 
-            const funcName = `add${props.isIncome ? "Income" : "Expense"}`;
-            store[funcName]((props.amount || 0) - newAmount);
+            store.dispatch({
+                type: "ADD", budget: {
+                    [props.isIncome ? "income" : "expense"]: (props.amount || 0) - newAmount
+                }
+            });
 
             setIsSaving(false);
         }

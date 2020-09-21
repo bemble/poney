@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import store from "./Store";
+import store from "../../store";
 import {
     faFileInvoiceDollar,
     faHandHoldingUsd,
@@ -8,17 +8,17 @@ import {
 import Header from "../../components/Header";
 
 export default React.memo(() => {
-    const storeState = store.getState();
-    const [amount, setAmount] = useState(storeState.Amount);
-    const [expected, setExpected] = useState(storeState.Expected);
-    const [alreadyPaid, setAlreadyPaid] = useState(storeState.AlreadyPaid);
+    const {project} = store.getState();
+    const [amount, setAmount] = useState(project.amount);
+    const [expected, setExpected] = useState(project.expected);
+    const [alreadyPaid, setAlreadyPaid] = useState(project.alreadyPaid);
 
     useEffect(() => {
         store.subscribe(() => {
-            const {Amount, Expected, AlreadyPaid} = store.getState();
-            setAmount(Amount);
-            setExpected(Expected);
-            setAlreadyPaid(AlreadyPaid);
+            const {amount, expected, alreadyPaid} = store.getState().project;
+            setAmount(amount);
+            setExpected(expected);
+            setAlreadyPaid(alreadyPaid);
         });
     }, []);
 

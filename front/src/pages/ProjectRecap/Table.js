@@ -1,18 +1,20 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     makeStyles,
     Table,
     TableBody,
     TableCell,
-    TableHead,
-    TableRow, useMediaQuery, useTheme
+    TableRow
 } from "@material-ui/core";
+import LineDetailsDialog from "./LineDetailsDialog";
 import Bullet from "../../components/Bullet";
 import {formatNumber} from "../../core/Tools";
 import {blue, blueGrey, grey, indigo} from "@material-ui/core/colors";
-import XsTable from "./XsTable";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faInfoCircle} from "@fortawesome/free-solid-svg-icons";
+import store from "../../store";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     details: {
         margin: 0,
         "& > *": {
@@ -20,14 +22,10 @@ const useStyles = makeStyles({
         }
     },
     paid: {
-        color: indigo[500],
-    },
-    alreadyPaid: {
-        fontSize: 10,
-        color: blueGrey[200]
+        color: theme.palette.type === "light" ? indigo[500] : indigo[300]
     },
     expected: {
-        color: blueGrey[300],
+        color: theme.palette.type === "light" ? blueGrey[300] : blueGrey[600]
     },
     list: {
         margin: 0
@@ -50,43 +48,51 @@ const useStyles = makeStyles({
             fontWeight: 400
         }
     }
-});
+}));
 
-export default React.memo((props) => {
-    const theme = useTheme();
-    const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
+export default React.memo(() => {
+    const {project} = store.getState();
+    const [lines, setLines] = useState(project.lines || []);
+
+    useEffect(() => {
+        const unsubscribe = store.subscribe(() => {
+            const {project} = store.getState();
+            setLines(project.lines || []);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const handleView = (editLineId) => {
+        store.dispatch({
+            type: "SET",
+            project: {editLineId}
+        });
+    };
 
     const classes = useStyles();
 
     return <div>
-        {!isLargeScreen ? <XsTable lines={props.lines} /> : <Table style={{minWidth: "100%"}}>
-            <TableHead>
-                <TableRow>
-                    <TableCell>Libelle</TableCell>
-                    <TableCell align="right">Payé</TableCell>
-                    <TableCell align="right">Budgetisé</TableCell>
-                    <TableCell>Commentaire</TableCell>
-                </TableRow>
-            </TableHead>
+        <Table style={{width: "100%"}}>
             <TableBody>
-                {props.lines.map((line) => <TableRow hover={isLargeScreen} key={line.id}>
-                    <TableCell size="small" className={classes.cell}>
+                {lines.map((line) => <TableRow key={line.id}>
+                    <TableCell size="small" onClick={() => handleView(line.id)}>
                         <Bullet
                             variant={(line.amount || 0) + (line.alreadyPaidAmount || 0) > (line.expectedAmount || 0) ? "alert" : "cool"}/>
                         {line.label}
+                        <p className={classes.details}>
+                            <span
+                                className={classes.paid}>{formatNumber((line.amount || 0) + (line.alreadyPaidAmount || 0))}</span>
+                            <span>|</span>
+                            <span className={classes.expected}>{formatNumber(line.expectedAmount || 0)}</span>
+                        </p>
                     </TableCell>
-                    <TableCell size="small" align="right" className={classes.cell}>
-                        {formatNumber((line.amount || 0) + (line.alreadyPaidAmount || 0))}
-                    </TableCell>
-                    <TableCell size="small" align="right" className={classes.cell}>
-                        {formatNumber(line.expectedAmount || 0)}
-                        </TableCell>
-                    <TableCell size="small" className={classes.cell}>
-                        {line.comment ? <ul className={classes.list}>{(line.comment || "").split("\n").map(c =>
-                            <li>{c}</li>)}</ul> : null}
+                    <TableCell className={classes.tools}>
+                        <FontAwesomeIcon icon={faInfoCircle} onClick={() => handleView(line.id)}/>
                     </TableCell>
                 </TableRow>)}
             </TableBody>
-        </Table>}
+        </Table>
+        <LineDetailsDialog/>
     </div>;
 });

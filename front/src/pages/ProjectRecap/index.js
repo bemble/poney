@@ -4,7 +4,7 @@ import Title from "../../components/Title";
 import Loading from "../../components/Loading";
 import Table from "./Table";
 import Header from "./Header";
-import store from "./Store";
+import store from "../../store";
 import moment from "moment";
 import {useParams} from "react-router-dom";
 import Api from "../../core/Api";
@@ -12,19 +12,19 @@ import Api from "../../core/Api";
 export default function Project() {
     const [isLoading, setIsLoading] = useState(true);
     const [project, setProject] = useState(null);
-    const [lines, setLines] = useState([]);
     const {id} = useParams();
 
     useEffect(() => {
-        store.setProject(id);
-
         (async () => {
-            const project = await Api.get(`project`, id);
-            project.endAt = moment.unix(project.endAt);
-            setProject(project);
+            const info = await Api.get(`project`, id);
+            info.endAt = moment.unix(info.endAt);
+            setProject(info);
             const lines = (await Api.search(`project_line`, {$where: {idProject: id}})) || [];
-            setLines(lines);
-            await store.refreshFromDatabase(id);
+            const totals = (await Api.service(`projects/totals/${id}`));
+            store.dispatch({
+                type: "SET",
+                project: {id, info, lines, ...totals}
+            });
 
             setIsLoading(false);
         })();
@@ -36,7 +36,7 @@ export default function Project() {
         {!isLoading ? <Grid container spacing={1}>
                 <Header/>
                 <Grid item xs={12}>
-                    <Table projectId={id} lines={lines} endAt={project.endAt} edit={true}/>
+                    <Table/>
                 </Grid>
             </Grid> : null}
     </div>;

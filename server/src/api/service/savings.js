@@ -94,7 +94,6 @@ class Savings {
         return db.all(`SELECT bl.id,bl.label,b.label AS budgetLabel
                        FROM budgetLine bl
                               JOIN budget b ON b.id = bl.idBudget
-                       WHERE bl.operationKind = ?
-                         AND bl.id NOT IN (SELECT idBudgetLine FROM saving)`, ["savingTransfer"]);
+                       WHERE bl.operationKind = ?`, ["savingTransfer"]);
     }
 }

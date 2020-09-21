@@ -4,10 +4,11 @@ import Title from "../../components/Title";
 import Loading from "../../components/Loading";
 import BudgetTable from "./BudgetTable";
 import Header from "./Header";
-import store from "./Store";
+import store from "../../store";
 import Api from "../../core/Api";
 import EditDialog from "./EditDialog";
 import {Add as AddIcon} from "@material-ui/icons";
+import {useParams} from "react-router-dom";
 import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles(theme => ({
@@ -22,7 +23,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function Budget(props) {
-    const [idBudget, setIdBudget] = useState(0);
+    const {id} = useParams();
     const [isLoading, setIsLoading] = useState(true);
     const [budget, setBudget] = useState(null);
     const [lines, setLines] = useState([]);
@@ -31,20 +32,21 @@ export default function Budget(props) {
     const [edit, setEdit] = useState(null);
     const [displayDialog, setDisplayDialog] = useState(false);
 
-    const load = async (id) => {
-        id = id || idBudget || store.getState().idBudget;
-
+    const load = async () => {
         setIsLoading(true);
         setBudget(await Api.get(`budget`, id));
         setLines(await Api.search(`budget_line`, {$where: {idBudget: id}, $orderBy:["order", "id"]}));
-        await store.refreshFromDatabase(id);
+        const counts = await Api.service(`budgets/totals/${id}`);
+        store.dispatch({
+            type: "SET",
+            budget: {
+                id, ...counts
+            }
+        });
         setIsLoading(false);
     };
 
     useEffect(() => {
-        const {id} = props.match.params;
-        store.setBudget(id);
-        setIdBudget(id);
         (async () => {
             await load(id);
         })();
@@ -89,7 +91,7 @@ export default function Budget(props) {
                  onClick={() => setDisplayDialog(true)}>
                 <AddIcon/>
             </Fab>
-            {displayDialog || edit ? <EditDialog onClose={(saved) => handleClose(saved)} {...edit} idBudget={idBudget}
+            {displayDialog || edit ? <EditDialog onClose={(saved) => handleClose(saved)} {...edit} idBudget={id}
                                                  isIncome={currentPanel === 1}/> : null}
         </div> : null}
     </div>;

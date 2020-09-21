@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -6,11 +6,12 @@ import {
     DialogActions,
     Button, CircularProgress,
     useTheme,
-    useMediaQuery, Grid, TextField
+    useMediaQuery, Grid, TextField, Slide
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import Api from "../../core/Api";
-import store from "./Store";
+import store from "../../store";
+import SlideUpTransition from "../../components/SlideUpTransition";
 
 const useStyles = makeStyles(theme => ({
     dialog: {
@@ -59,12 +60,32 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default React.memo((props) => {
-    const [label, setLabel] = useState(props.label || "");
-    const [amount, setAmount] = useState(props.amount || 0);
-    const [expectedAmount, setExpectedAmount] = useState(props.expectedAmount || 0);
-    const [alreadyPaidAmount, setAlreadyPaidAmount] = useState(props.alreadyPaidAmount || 0);
-    const [comment, setComment] = useState(props.comment || "");
+    const {project} = store.getState();
+    const line = project.lines.filter(l => l.id === project.editLineId)[0] || {};
+
+    const [editLineId, setEditLineId] = useState(project.editLineId);
+    const [label, setLabel] = useState(line.label || "");
+    const [amount, setAmount] = useState(line.amount || 0);
+    const [expectedAmount, setExpectedAmount] = useState(line.expectedAmount || 0);
+    const [alreadyPaidAmount, setAlreadyPaidAmount] = useState(line.alreadyPaidAmount || 0);
+    const [comment, setComment] = useState(line.comment || "");
     const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        const unsubscribe = store.subscribe(() => {
+            const {project} = store.getState();
+            const line = project.lines.filter(l => l.id === project.editLineId)[0] || {};
+
+            setEditLineId(project.editLineId);
+            setLabel(line.label || "");
+            setAmount(line.amount || 0);
+            setExpectedAmount(line.expectedAmount || 0);
+            setAlreadyPaidAmount(line.alreadyPaidAmount || 0);
+            setComment(line.comment || "");
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const handleClose = async (save) => {
         if (save) {
@@ -72,24 +93,27 @@ export default React.memo((props) => {
             const newAmount = parseFloat(("" + amount).replace(',', '.'));
             const newExpectedAmount = parseFloat(("" + expectedAmount).replace(',', '.'));
             const newAlreadyPaidAmount = parseFloat(("" + alreadyPaidAmount).replace(',', '.'));
-            save = await Api.addOrUpdate(`projectLine`, props.id, {
-                idProject: props.idProject,
+            await Api.addOrUpdate(`projectLine`, store.getState().project.editLineId, {
+                idProject: store.getState().project.id,
                 label, amount: newAmount, expectedAmount: newExpectedAmount,
                 alreadyPaidAmount: newAlreadyPaidAmount, comment
             });
 
+            props.onSaved && props.onSaved();
             setIsSaving(false);
         }
-        props.onClose && props.onClose(save);
+        store.dispatch({
+            type: "SET", project: {editLineId: -1}
+        });
     };
 
-    const isEdit = props.id;
+    const isEdit = editLineId > 0;
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const classes = useStyles();
 
-    return <Dialog open={true} fullScreen={fullScreen} onClose={() => handleClose()}
-                   aria-labelledby="form-dialog-title" className={classes.dialog}>
+    return <Dialog open={editLineId >= 0} fullScreen={fullScreen} onClose={handleClose}
+                   className={classes.dialog} TransitionComponent={SlideUpTransition}>
         <DialogTitle className={classes.dialogTitle}
                      id="form-dialog-title">{isEdit ? "Editer la ligne" : "Créer une ligne"}
         </DialogTitle>

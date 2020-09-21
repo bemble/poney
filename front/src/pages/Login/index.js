@@ -91,10 +91,10 @@ const useStyles = makeStyles(theme => ({
 const tokenCallback = (data) => {
     if (!!(data && data.access_token)) {
         localStorage.setItem(Login.LS_REFRESH, data.refresh_token);
-        store.dispatch({type: "SET", token: data.access_token});
+        store.dispatch({type: "SET", app: {token: data.access_token}});
         return true;
     }
-    store.dispatch({type: "SET", token: null});
+    store.dispatch({type: "SET", app: {token: null}});
     return false;
 };
 

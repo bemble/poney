@@ -4,13 +4,13 @@ import Title from "../../components/Title";
 import Loading from "../../components/Loading";
 import Table from "./Table";
 import Header from "./Header";
-import store from "./Store";
+import store from "../../store";
 import moment from "moment";
-import {useParams, useLocation} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import Api from "../../core/Api";
 import {Add as AddIcon} from "@material-ui/icons";
 import {makeStyles} from "@material-ui/core/styles";
-import EditDialog from "./EditDialog";
+import EditLineDialog from "./EditLineDialog";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -26,38 +26,39 @@ const useStyles = makeStyles(theme => ({
 export default function Project() {
     const [isLoading, setIsLoading] = useState(true);
     const [project, setProject] = useState(null);
-    const [lines, setLines] = useState([]);
     const {id} = useParams();
 
-    const [edit, setEdit] = useState(null);
-    const [displayDialog, setDisplayDialog] = useState(false);
-
     const load = async () => {
-        const project = await Api.get(`project`, id);
-        project.endAt = moment.unix(project.endAt);
-        setProject(project);
+        const info = await Api.get(`project`, id);
+        info.endAt = moment.unix(info.endAt);
+        setProject(info);
         const lines = (await Api.search(`project_line`, {$where: {idProject: id}})) || [];
-        setLines(lines);
-        await store.refreshFromDatabase(id);
+        const totals = (await Api.service(`projects/totals/${id}`));
+        store.dispatch({
+            type: "SET",
+            project: {id, info, lines, ...totals}
+        });
 
         setIsLoading(false);
     };
 
     useEffect(() => {
-        store.setProject(id);
         (async () => {
             await load();
         })();
     }, []);
 
-    const handleClose = async (saved) => {
-        setEdit(null);
-        setDisplayDialog(false);
-        if (saved) {
-            (async () => {
-                await load();
-            })();
-        }
+    const handleAddLine = async () => {
+        store.dispatch({
+            type: "SET",
+            project: {editLineId: 0}
+        });
+    };
+
+    const handleSaved = async () => {
+        (async () => {
+            await load();
+        })();
     };
     const classes = useStyles();
 
@@ -67,14 +68,13 @@ export default function Project() {
         {!isLoading ? <Grid container spacing={1} className={classes.root}>
             <Header/>
             <Grid item xs={12}>
-                <Table projectId={id} lines={lines} endAt={project.endAt}
-                       onEditLine={(line) => setEdit(line)}/>
+                <Table/>
             </Grid>
             <Fab aria-label="Ajouter une nouvelle ligne" className={classes.fab} color="primary"
-                 onClick={() => setDisplayDialog(true)}>
+                 onClick={handleAddLine}>
                 <AddIcon/>
             </Fab>
-            {displayDialog || edit ? <EditDialog onClose={(saved) => handleClose(saved)} {...edit} idProject={id}/> : null}
+            <EditLineDialog onSaved={handleSaved}/>
         </Grid> : null}
     </div>;
 };

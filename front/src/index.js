@@ -19,4 +19,3 @@ serviceWorker.register({
     onSuccess: () => store.dispatch({type: "SW_INIT"}),
     onUpdate: reg => store.dispatch({type: "SW_UPDATE", payload: reg}),
 });
-serviceWorker.unregister();

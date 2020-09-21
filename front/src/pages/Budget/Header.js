@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import store from "./Store";
+import store from "../../store";
 import {
     faPiggyBank,
     faBalanceScale,
@@ -9,18 +9,19 @@ import {
 import Header from "../../components/Header";
 
 export default React.memo(() => {
-    const storeState = store.getState();
-    const [incomes, setIncomes] = useState(storeState.incomes);
-    const [expenses, setExpenses] = useState(storeState.expenses);
-    const [transfers, setTransfers] = useState(storeState.transfers);
+    const {budget} = store.getState();
+    const [incomes, setIncomes] = useState(budget.incomes);
+    const [expenses, setExpenses] = useState(budget.expenses);
+    const [transfers, setTransfers] = useState(budget.transfers);
 
     useEffect(() => {
-        store.subscribe(() => {
-            const {incomes, expenses, transfers} = store.getState();
+        const unsubscribe = store.subscribe(() => {
+            const {incomes, expenses, transfers} = store.getState().budget;
             setIncomes(incomes);
             setExpenses(expenses);
             setTransfers(transfers);
         });
+        return () => unsubscribe();
     }, []);
 
     const totalDiff = incomes - expenses;
