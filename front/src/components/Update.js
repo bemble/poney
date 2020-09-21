@@ -14,33 +14,19 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default React.memo(() => {
-    const [isInitialized, setIsInitialized] = useState();
     const [isUpdated, setIsUpdated] = useState();
-    const [registration, setRegistration] = useState();
 
     useEffect(() => {
         const unregister = store.subscribe(() => {
-            const {serviceWorkerInitialized, serviceWorkerUpdated, serviceWorkerRegistration} = store.getState().update;
-            setIsInitialized(serviceWorkerInitialized);
+            const {serviceWorkerUpdated} = store.getState().update;
             setIsUpdated(serviceWorkerUpdated);
-            setRegistration(serviceWorkerRegistration);
         });
 
         return () => unregister();
     }, []);
 
     const updateServiceWorker = () => {
-        const registrationWaiting = registration && registration.waiting;
-
-        if (registrationWaiting) {
-            store.dispatch({type: 'SKIP_WAITING'});
-
-            registrationWaiting.addEventListener('statechange', e => {
-                if (e.target.state === 'activated') {
-                    window.location.reload(true);
-                }
-            });
-        }
+        store.dispatch({type: 'SKIP_WAITING'});
     };
 
     const classes = useStyles();

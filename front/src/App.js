@@ -74,7 +74,7 @@ export default React.memo(() => {
             const {token} = store.getState().app;
             if (token && !isSignedId) {
                 setIsSignedIn(true);
-            } else if (!token && isSignedId) {
+            } else if (!token) {
                 setIsSignedIn(false);
             }
         });

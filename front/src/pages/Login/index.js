@@ -110,6 +110,14 @@ const refreshToken = async () => {
     }
 };
 
+window.document.addEventListener("visibilitychange", () => {
+    if(window.document.visibilityState === "visible") {
+        (async() => {
+            await refreshToken();
+        })();
+    }
+});
+
 const Login = (props) => {
     const classes = useStyles();
     const [hasRequest, setHasRequest] = useState(false);
