@@ -18,6 +18,14 @@ import {Link} from "react-router-dom";
 import Api from "../../core/Api";
 
 const useStyles = makeStyles(theme => ({
+    dialog: {
+        top: '10vh !important',
+        maxWidth: 600,
+        margin: "0 auto",
+        "& .MuiPaper-root.MuiDialog-paper": {
+            paddingBottom: `env(safe-area-inset-bottom)`
+        }
+    },
     dialogTitle: {
         [theme.breakpoints.down("sm")]: {
             color: theme.palette.primary.contrastText,
@@ -55,7 +63,7 @@ export default React.memo((props) => {
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const classes = useStyles();
 
-    return <Dialog open={true} fullScreen={fullScreen} onClose={() => handleClose()} aria-labelledby="form-dialog-title">
+    return <Dialog open={true} fullScreen={fullScreen} onClose={() => handleClose()} className={classes.dialog}>
         <DialogTitle className={classes.dialogTitle} id="form-dialog-title">{isEdit ? "Editer le projet" : "Créer un projet"}</DialogTitle>
         <DialogContent>
             <Grid container direction="column" spacing={1}>

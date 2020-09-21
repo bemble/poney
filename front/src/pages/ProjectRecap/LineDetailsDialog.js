@@ -19,6 +19,14 @@ import store from "../../store";
 import {blue, blueGrey, indigo} from "@material-ui/core/colors";
 
 const useStyles = makeStyles((theme) => ({
+    dialog: {
+        top: '10vh !important',
+        maxWidth: 600,
+        margin: "0 auto",
+        "& .MuiPaper-root.MuiDialog-paper": {
+            paddingBottom: `env(safe-area-inset-bottom)`
+        }
+    },
     paid: {
         color: theme.palette.type === "light" ? indigo[500] : indigo[300]
     },
@@ -31,9 +39,6 @@ const useStyles = makeStyles((theme) => ({
     },
     list: {
         margin: 0
-    },
-    dialog: {
-        top: '10vh !important'
     },
     dialogTitle: {
         color: "#FFF",

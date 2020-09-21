@@ -20,7 +20,10 @@ const useStyles = makeStyles(theme => ({
     dialog: {
         top: '10vh !important',
         maxWidth: 600,
-        margin: "0 auto"
+        margin: "0 auto",
+        "& .MuiPaper-root.MuiDialog-paper": {
+            paddingBottom: `env(safe-area-inset-bottom)`
+        }
     },
     dialogTitle: {
         color: "#FFF",
@@ -75,7 +78,8 @@ export default React.memo((props) => {
             </Table>
             {props.lineDetails.comment ? <div>
                 <h5>Commentaires</h5>
-                <ul className={classes.list}>{(props.lineDetails.comment || "").split("\n").map((c, i) => <li key={i}>{c}</li>)}</ul>
+                <ul className={classes.list}>{(props.lineDetails.comment || "").split("\n").map((c, i) => <li
+                    key={i}>{c}</li>)}</ul>
             </div> : null}
         </DialogContent> : null}
     </Dialog>;

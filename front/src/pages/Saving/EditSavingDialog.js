@@ -28,6 +28,14 @@ import {BlockPicker} from "react-color";
 import Api from "../../core/Api";
 
 const useStyles = makeStyles(theme => ({
+    dialog: {
+        top: '10vh !important',
+        maxWidth: 600,
+        margin: "0 auto",
+        "& .MuiPaper-root.MuiDialog-paper": {
+            paddingBottom: `env(safe-area-inset-bottom)`
+        }
+    },
     title: {
         [theme.breakpoints.down("xs")]: {
             color: "#FFF",
@@ -104,7 +112,7 @@ export default React.memo((props) => {
         props.onClose && props.onClose();
     };
 
-    return <Dialog open={!!props.saving} onClose={handleCancel} fullScreen={fullScreen}>
+    return <Dialog open={!!props.saving} onClose={handleCancel} className={classes.dialog} fullScreen={fullScreen}>
         <DialogTitle className={classes.title}>Editer la catégorie d'épargne</DialogTitle>
         <DialogContent>
             <DialogContentText id="alert-dialog-description">

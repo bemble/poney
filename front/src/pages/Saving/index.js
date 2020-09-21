@@ -216,7 +216,7 @@ export default React.memo(() => {
                             <FormControlLabel
                                 control={<Checkbox checked={displayArchived}
                                                    onChange={() => setDisplayArchived((prev) => !prev)}/>}
-                                label="Afficher les archivés"
+                                label="Afficher les archivées"
                             />
                         </Grid>
                     </Grid>

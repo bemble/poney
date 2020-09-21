@@ -15,6 +15,9 @@ import SlideUpTransition from "../../components/SlideUpTransition";
 
 const useStyles = makeStyles(theme => ({
     dialog: {
+        top: '10vh !important',
+        maxWidth: 600,
+        margin: "0 auto",
         "& .MuiPaper-root.MuiDialog-paper": {
             paddingBottom: `env(safe-area-inset-bottom)`
         }

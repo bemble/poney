@@ -33,6 +33,14 @@ import {BlockPicker} from "react-color";
 import Api from "../../core/Api";
 
 const useStyles = makeStyles(theme => ({
+    dialog: {
+        top: '10vh !important',
+        maxWidth: 600,
+        margin: "0 auto",
+        "& .MuiPaper-root.MuiDialog-paper": {
+            paddingBottom: `env(safe-area-inset-bottom)`
+        }
+    },
     title: {
         [theme.breakpoints.down("xs")]: {
             color: "#FFF",
@@ -80,7 +88,7 @@ export default React.memo((props) => {
 
     useEffect(() => {
         (async () => {
-            setLines(await Api.list(`saving`));
+            setLines(await Api.search(`saving`, {$where: {isArchived: false}}));
             setBudgetLines(await Api.service(`savings/budget_lines`));
 
             setLineId(null);
@@ -149,7 +157,7 @@ export default React.memo((props) => {
         props.onClose && props.onClose();
     };
 
-    return <Dialog open={props.visible} onClose={handleCancel} fullScreen={fullScreen}>
+    return <Dialog open={props.visible} onClose={handleCancel} fullScreen={fullScreen} className={classes.dialog}>
         <DialogTitle className={classes.title}>Ajouter un revenu ou une dépense</DialogTitle>
         <DialogContent>
             <DialogContentText id="alert-dialog-description">
