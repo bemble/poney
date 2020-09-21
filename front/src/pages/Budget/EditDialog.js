@@ -25,8 +25,6 @@ import {
 
 import {BlockPicker} from "react-color";
 import {makeStyles} from "@material-ui/core/styles";
-
-
 import {operationKinds, linxoCategories} from "./BudgetLine/core";
 import Api from "../../core/Api";
 import store from "./Store";

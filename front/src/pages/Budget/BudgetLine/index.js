@@ -44,7 +44,7 @@ const useStyle = makeStyles(theme => ({
 
 export default React.memo((props) => {
     const classes = useStyle();
-    const [id, setId] = useState(props.id);
+    const [id] = useState(props.id);
     const [color, setColor] = useState(props.color);
 
     const getOperationKindLabel = (operationKind) => {

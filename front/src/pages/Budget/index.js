@@ -45,14 +45,18 @@ export default function Budget(props) {
         const {id} = props.match.params;
         store.setBudget(id);
         setIdBudget(id);
-        load(id);
+        (async () => {
+            await load(id);
+        })();
     }, []);
 
     const handleClose = async (saved) => {
         setEdit(null);
         setDisplayDialog(false);
         if (saved) {
-            load();
+            (async () => {
+                await load();
+            })();
         }
     };
 

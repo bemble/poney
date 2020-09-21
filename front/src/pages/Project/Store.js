@@ -1,4 +1,5 @@
 import {createStore} from 'redux';
+import Api from "../../core/Api";
 
 const initialState = {
     idProject: -1,
@@ -40,16 +41,11 @@ store.refreshFromDatabase = async (id) => {
         id = store.getState().idProject;
     }
 
-    /*const [counts] = await Database.all(`SELECT
-                                           SUM(amount)            AS Amount,
-                                           SUM(expectedAmount)    AS Expected,
-                                           SUM(alreadyPaidAmount) AS AlreadyPaid
-                                         FROM projectLine
-                                         WHERE idProject = ?`, [id]);
+    const counts = await Api.service(`projects/totals/${id}`);
 
     ["Amount", "Expected", "AlreadyPaid"].forEach(op => {
         store[`set${op}`](counts[op]);
-    });*/
+    });
 };
 
 export default store;

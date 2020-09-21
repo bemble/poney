@@ -73,7 +73,7 @@ export default React.memo((props) => {
         <Table style={{width: "100%"}}>
             <TableBody>
                 {props.lines.map((line) => <TableRow key={line.id}>
-                    <TableCell size="small">
+                    <TableCell size="small" onClick={() => setLineDetails(line)}>
                         <Bullet
                             variant={(line.amount || 0) + (line.alreadyPaidAmount || 0) > (line.expectedAmount || 0) ? "alert" : "cool"}/>
                         {line.label}

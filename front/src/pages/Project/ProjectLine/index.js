@@ -6,9 +6,9 @@ import {
 import React, {useState} from "react";
 import {grey} from "@material-ui/core/colors";
 import Tools from "./Tools";
-import LineInput from "./LineInput";
+import {formatNumber} from "../../../core/Tools"
 
-const useStyle = makeStyles({
+const useStyle = makeStyles(theme => ({
     root: {
         "& .MuiTableCell-sizeSmall": {
             padding: 2
@@ -28,36 +28,37 @@ const useStyle = makeStyles({
     tools: {
         width: 44
     },
-    cell: {
-        verticalAlign: "top"
+    subInfo: {
+        fontSize: 11,
+        color: theme.palette.type === "dark" ? "rgba(255,255,255,0.42)" : "rgba(0,0,0,0.42)"
+    },
+    expected: {
+        fontWeight: "bold",
+        fontFamily: "monospace"
+    },
+    real: {
+        fontFamily: "monospace"
     }
-});
+}));
 
 export default React.memo((props) => {
     const classes = useStyle();
-    const [id, setId] = useState(props.id);
-
-    const onCreated = (newId) => {
-        setId(newId);
-        props.onCreated && props.onCreated(props.id);
-    };
-
-    const fields = {
-        "label": {},
-        "amount": {number: true, alignRight: true},
-        "alreadyPaidAmount": {number: true, alignRight: true},
-        "expectedAmount": {number: true, alignRight: true},
-        "comment": {multiline: true}
-    };
-
-    const cleanFields = Object.entries(fields);
+    const [id] = useState(props.id);
 
     return <TableRow hover>
+        <TableCell size="small">
+            {props.label}<br/>
+            <span className={classes.subInfo}>
+                Payé en {props.endAt.format("MM/YYYY")} : {formatNumber(props.amount)},
+                avancé : {formatNumber(props.alreadyPaidAmount)}
+            </span>
+        </TableCell>
+        <TableCell size="small" align="right">
+            <span className={classes.expected}>{formatNumber(props.expectedAmount)}</span><br/>
+            <span className={classes.real}>{formatNumber(props.alreadyPaidAmount + props.amount)}</span>
+        </TableCell>
         <TableCell size="small" className={classes.tools}>
             <Tools {...{...props, id, initialId: id}} />
         </TableCell>
-        {cleanFields.map(([name, options], i) => <TableCell key={i} size="small" className={classes.cell}>
-            <LineInput value={props[name]} {...{...options, name, id}} onCreated={onCreated}/>
-        </TableCell>)}
     </TableRow>;
 });

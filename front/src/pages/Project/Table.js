@@ -27,30 +27,16 @@ const useStyles = makeStyles({
         fontSize: 20,
         fontWeight: 200,
         textAlign: "center"
-    },
-    tools: {
-        width: 44
     }
-});
-
-
-
-const createLine = (id = -1) => ({
-    id,
-    label: "",
-    amount: "",
-    expectedAmount: "",
-    alreadyPaidAmount: "",
-    comment: ""
 });
 
 export default React.memo((props) => {
     const initialLines = [...props.lines.map(e => {
-        if(!(e.categories instanceof Array)) {
+        if (!(e.categories instanceof Array)) {
             e.categories = (e.categories || "").split('|').filter(e => !!e.trim().length);
         }
         return e;
-    }), createLine()];
+    })];
 
     const classes = useStyles();
     const [lines, setLines] = useState(initialLines);
@@ -68,14 +54,7 @@ export default React.memo((props) => {
     const handleOnCreated = async (id) => {
         const index = lines.findIndex(l => l.id === id);
         if (index >= 0) {
-            const newLines = [...lines];
-            let minId = Math.min(...lines.map(l => l.id));
-            if (minId > 0) {
-                minId = 0;
-            }
-            minId--;
-            newLines.push(createLine(minId));
-            setLines(newLines);
+            setLines([...lines]);
         }
     };
 
@@ -83,20 +62,14 @@ export default React.memo((props) => {
         <TableHead>
             <TableRow>
                 <TableCell className={classes.title}
-                           colSpan={6}>Dépenses</TableCell>
-            </TableRow>
-            <TableRow>
-                <TableCell className={classes.tools}/>
-                <TableCell>Libelle</TableCell>
-                <TableCell>Payé en {props.endAt.format("MM/YYYY")}</TableCell>
-                <TableCell>Avancé</TableCell>
-                <TableCell>Budgetisé</TableCell>
-                <TableCell>Commentaire</TableCell>
+                           colSpan={3}>Dépenses</TableCell>
             </TableRow>
         </TableHead>
         <TableBody>
-            {lines.map((line) => <ProjectLine key={line.id} {...line} onDeleted={handleOnDeleted}
-                                              onCreated={handleOnCreated}/>)}
+            {lines.map((line) => <ProjectLine key={line.id} {...line} endAt={props.endAt}
+                                              onDeleted={handleOnDeleted}
+                                              onCreated={handleOnCreated}
+                                              onEdit={() => props.onEditLine && props.onEditLine(line)}/>)}
         </TableBody>
     </Table>;
 });
