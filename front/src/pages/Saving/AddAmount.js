@@ -41,6 +41,21 @@ const useStyles = makeStyles(theme => ({
                 fontWeight: 400
             }
         }
+    },
+    colorContainer: {
+        display: "flex",
+        alignItems: "center",
+        marginTop: theme.spacing(2)
+    },
+    colorButton: {
+        padding: 0,
+        paddingRight: theme.spacing()
+    },
+    colorPreview: {
+        width: "100%",
+        height: 22,
+        borderRadius: theme.shape.borderRadius,
+        border: "1px solid rgba(0, 0, 0,0.32)"
     }
 }));
 
@@ -146,27 +161,31 @@ export default React.memo((props) => {
                     <MenuItem value={-1}><ListItemText primary="Nouvelle..."/> </MenuItem>
                 </TextField>
                 {lineId === -1 ? <div>
-                    <IconButton aria-label="Couleur" onClick={() => setDisplayPicker(!displayPicker)}>
-                        <ColorIcon fontSize="small"/>
-                    </IconButton>
-                    {displayPicker ? <div style={{
-                        position: "absolute",
-                        zIndex: 10000,
-                        marginLeft: 85,
-                        marginTop: -128
-                    }}>
-                        <div style={{
-                            position: 'fixed',
-                            top: 0,
-                            right: 0,
-                            bottom: 0,
-                            left: 0,
-                        }} onClick={() => setDisplayPicker(!displayPicker)}/>
-                        <BlockPicker color={color} triangle={"hide"} onChange={handleColorChange}
-                                     colors={[red[100], pink[100], purple[100], deepPurple[100], indigo[100], blue[100],
-                                         lightBlue[100], cyan[100], teal[100], green[100], lightGreen[100], lime[100], yellow[100],
-                                         amber[100], orange[100], deepOrange[100], brown[100], grey[100], blueGrey[100], "#FFFFFF"]}/>
-                    </div> : null}
+                    <div className={classes.colorContainer}>
+                        <IconButton aria-label="Couleur" className={classes.colorButton}
+                                    onClick={() => setDisplayPicker(!displayPicker)}>
+                            <ColorIcon fontSize="small"/>
+                        </IconButton>
+                        {displayPicker ? <div style={{
+                            position: "absolute",
+                            zIndex: 10000,
+                            marginLeft: 85,
+                            marginTop: -128
+                        }}>
+                            <div style={{
+                                position: 'fixed',
+                                top: 0,
+                                right: 0,
+                                bottom: 0,
+                                left: 0,
+                            }} onClick={() => setDisplayPicker(!displayPicker)}/>
+                            <BlockPicker color={color} triangle={"hide"} onChange={handleColorChange}
+                                         colors={[red[100], pink[100], purple[100], deepPurple[100], indigo[100], blue[100],
+                                             lightBlue[100], cyan[100], teal[100], green[100], lightGreen[100], lime[100], yellow[100],
+                                             amber[100], orange[100], deepOrange[100], brown[100], grey[100], blueGrey[100], "#FFFFFF"]}/>
+                        </div> : null}
+                        <div className={classes.colorPreview} style={{background: color}}/>
+                    </div>
                     <TextField fullWidth select label="Catégorie du budget" value={budgetLineId}
                                onChange={(e) => setBudgetLineId(e.target.value) || setCategory(budgetLines.find((el) => el.id === e.target.value).label)}>
                         {budgetLines.map(({budgetLabel, label, id}, i) => <MenuItem key={label + i} value={id}>

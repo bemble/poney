@@ -1,13 +1,15 @@
 import React, {useState, useEffect} from "react";
 import Header from "../../components/Header";
-import {faBalanceScale, faUmbrellaBeach} from "@fortawesome/free-solid-svg-icons";
+import {faBalanceScale, faUmbrellaBeach, faExpandArrowsAlt, faCogs} from "@fortawesome/free-solid-svg-icons";
 import {Add as AddIcon} from "@material-ui/icons";
 import {
     Fab,
     Grid,
     Paper,
-    makeStyles
+    makeStyles, Checkbox, FormControlLabel, Button,
+    Accordion, AccordionSummary, AccordionDetails, Typography
 } from "@material-ui/core";
+import {ExpandMore as ExpandMoreIcon} from "@material-ui/icons";
 import AddAmount from "./AddAmount";
 import {useLocation, useHistory} from "react-router-dom";
 import MomentUtils from "@date-io/moment";
@@ -18,10 +20,18 @@ import {formatNumber} from "../../core/Tools";
 import {blue, amber} from "@material-ui/core/colors";
 import Api from "../../core/Api";
 
+import EditSavingDialog from "./EditSavingDialog";
 import DetailsDialog from "./DetailsDialog";
 import EditDetailsDialog from "./EditDetailsDialog";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const useStyles = makeStyles(theme => ({
+    settingsContainer: {
+        margin: theme.spacing(2)
+    },
+    heading: {
+        color: "rgba(0,0,0,0.57)"
+    },
     tools: {
         padding: theme.spacing(1)
     },
@@ -36,7 +46,7 @@ const useStyles = makeStyles(theme => ({
         marginBottom: 80
     },
     difference: {
-        marginTop: theme.spacing(2),
+        margin: theme.spacing(2),
         padding: theme.spacing(),
         border: `1px solid ${amber[500]}`,
     },
@@ -52,29 +62,48 @@ export default React.memo(() => {
     const [showAddAmount, setShowAddAmount] = useState(useLocation().pathname.indexOf("/ajout-montant") >= 0);
     const [startDate, setStartDate] = useState(moment.utc());
     const [savings, setSavings] = useState([]);
+    const [budgetLines, setBudgetLines] = useState({});
     const [lineDetails, setLineDetails] = useState(null);
     const [editLine, setEditLine] = useState(null);
     const [amountProjects, setAmountProjects] = useState(0);
+    const [editSaving, setEditSaving] = useState(null);
+    const [displayArchived, setDisplayArchived] = useState(false);
 
     const updateSavingTotals = async () => {
         const amounts = await Api.service(`savings/totals`);
         setAmounts(amounts);
     };
 
+    const updateAll = async () => {
+        const query = displayArchived ? undefined : {
+            $where: {isArchived: false}
+        };
+        const savings = await Api.search(`saving`, query);
+        setSavings(savings);
+
+        const budgetLines = {};
+        (await Api.search(`budget_line`, {
+            $where: {id: {$in: savings.map(e => e.idBudgetLine)}}
+        })).forEach(e => {
+            budgetLines[e.id] = e;
+        });
+        setBudgetLines(budgetLines);
+
+        setAmountProjects((await Api.service(`projects/remaining`)).amount);
+
+        await updateSavingTotals();
+    };
+
     useEffect(() => {
         (async () => {
-            const savings = await Api.list(`saving`);
-            setSavings(savings);
-            setAmountProjects((await Api.service(`projects/remaining`)).amount);
-
-            await updateSavingTotals();
+            await updateAll();
         })();
 
         const start = moment.utc();
         start.set({hour: 0, minute: 0, second: 0, millisecond: 0});
         start.subtract(1, 'months');
         setStartDate(start);
-    }, []);
+    }, [displayArchived]);
 
     const data = [];
     let difference = 0;
@@ -104,15 +133,36 @@ export default React.memo(() => {
         history.push(`/comptes-epargne/ajout-montant`);
         setShowAddAmount(true);
     };
+
+    const handleDispatchSaving = async () => {
+        (async () => {
+            await Api.service(`savings/dispatch`, {method: "post"});
+            await updateAll();
+            setStartDate(moment(startDate));
+        })();
+    };
+
+    const handleEditSavingClose = async (saved) => {
+        setEditSaving(null);
+        if (saved) {
+            (async () => {
+                await updateAll();
+            })();
+        }
+    };
+
     const handleAddExpenseClose = async (newSavingCreated) => {
         setEditLine(null);
         history.push(`/comptes-epargne`);
         setShowAddAmount(false);
 
-        newSavingCreated && setSavings(await Api.list(`saving`));
-        await updateSavingTotals();
-        setStartDate(moment(startDate));
+        if(newSavingCreated) {
+            await updateAll();
+            setStartDate(moment(startDate));
+        }
     };
+
+    const dispatchDisabled = Math.floor(difference) < ((budgetLines ? Object.values(budgetLines) : []).map(({amount}) => amount).reduce((a, v) => a + v, 0) || 0);
 
     return <div>
         {data.length ? <Header data={data}/> : null}
@@ -120,32 +170,69 @@ export default React.memo(() => {
             Difference : <span className={classes.differenceAmount}>{formatNumber(Math.abs(difference))}</span>
             &nbsp;de plus {difference > 0 ? " sur le compte" : " dans l'application"}.
         </Paper> : null}
-        <MuiPickersUtilsProvider utils={MomentUtils} moment={moment} locale={"fr"}>
-            <Grid container spacing={1} style={{padding: "0 16px"}}>
-                <Grid item xs={12}>
-                    <DatePicker
-                        fullWidth
-                        variant="inline"
-                        openTo="month"
-                        views={["year", "month"]}
-                        margin="normal"
-                        label="Début"
-                        value={startDate}
-                        maxDate={moment.utc().set({hour: 0, minute: 0, second: 0, millisecond: 0})}
-                        onChange={setStartDate}
-                        autoOk={true}
-                    />
-                </Grid>
-            </Grid>
-        </MuiPickersUtilsProvider>
+        <div className={classes.settingsContainer}>
+            <Accordion>
+                <AccordionSummary className={classes.heading} expandIcon={<ExpandMoreIcon/>}>
+                    <Typography>
+                        <FontAwesomeIcon icon={faCogs}/> Paramètres
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Grid container spacing={0}>
+                        <Grid item xs={12}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="primary"
+                                className={classes.button}
+                                startIcon={<FontAwesomeIcon icon={faExpandArrowsAlt}/>}
+                                disabled={dispatchDisabled}
+                                onClick={() => handleDispatchSaving()}
+                            >
+                                Répartir la différence
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <MuiPickersUtilsProvider utils={MomentUtils} moment={moment} locale={"fr"}>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12}>
+                                        <DatePicker
+                                            fullWidth
+                                            variant="inline"
+                                            openTo="month"
+                                            views={["year", "month"]}
+                                            margin="normal"
+                                            label="Afficher depuis"
+                                            value={startDate}
+                                            maxDate={moment.utc().set({hour: 0, minute: 0, second: 0, millisecond: 0})}
+                                            onChange={setStartDate}
+                                            autoOk={true}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </MuiPickersUtilsProvider>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControlLabel
+                                control={<Checkbox checked={displayArchived}
+                                                   onChange={() => setDisplayArchived((prev) => !prev)}/>}
+                                label="Afficher les archivés"
+                            />
+                        </Grid>
+                    </Grid>
+                </AccordionDetails>
+            </Accordion>
+        </div>
         <Grid container spacing={2} className={classes.tables}>
             {savings.map(saving => <Grid item xs={12} sm={6}
                                          md={4} key={saving.id}>
-                <SavingTable saving={saving} from={startDate}
+                <SavingTable saving={saving} budgetLines={budgetLines} from={startDate}
+                             onSavingSelect={(total) => setEditSaving({...saving, total})}
                              onLineSelect={(details) => setLineDetails(details)}
                              onEditLineSelect={(line) => setEditLine(line)}/>
             </Grid>)}
         </Grid>
+        <EditSavingDialog saving={editSaving} onClose={handleEditSavingClose}/>
         <DetailsDialog lineDetails={lineDetails} onClose={() => setLineDetails(null)}/>
         <EditDetailsDialog line={editLine} onClose={handleAddExpenseClose}/>
         <AddAmount visible={showAddAmount} onClose={handleAddExpenseClose}/>

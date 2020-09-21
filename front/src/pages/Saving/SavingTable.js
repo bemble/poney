@@ -19,6 +19,9 @@ const useStyles = makeStyles(theme => ({
     head: {
         color: "rgba(0,0,0,0.72)"
     },
+    amountTotal: {
+        position: "relative"
+    },
     ok: {
         background: blueGrey[50],
         color: green[800]
@@ -27,10 +30,17 @@ const useStyles = makeStyles(theme => ({
         background: red[50],
         color: red[800]
     },
+    monthly: {
+        color: `rgba(0,0,0,0.32)`,
+        fontWeight: 200,
+        position: "absolute",
+        right: theme.spacing()
+    },
     tools: {
         width: 20,
         fontSize: 18,
-        color: theme.palette.type === "light" ? blueGrey[300] : blueGrey[500]
+        color: theme.palette.type === "light" ? blueGrey[300] : blueGrey[500],
+        textAlign: "right"
     },
     income: {
         color: theme.palette.type === "light" ? blueGrey[900] : blueGrey[100]
@@ -94,15 +104,20 @@ export default React.memo((props) => {
 
     return <Table size="small" className={classes.table}>
         <TableHead>
-            <TableRow>
-                <TableCell colSpan={4} align="center" className={classes.head}
-                           style={{background: props.saving.color}}>
+            <TableRow style={{background: props.saving.color}}
+                      onClick={() => props.onSavingSelect && props.onSavingSelect(total)}>
+                <TableCell colSpan={4} align="center" className={classes.head}>
                     {props.saving.label}
                 </TableCell>
             </TableRow>
             <TableRow>
                 <TableCell colSpan={4} align="center"
-                           className={total < 0 ? classes.warning : classes.ok}>{formatNumber(total)}</TableCell>
+                           className={classes.amountTotal + " " + (total < 0 ? classes.warning : classes.ok)}>
+                    {formatNumber(total)}{props.budgetLines[props.saving.idBudgetLine] ?
+                    <span className={classes.monthly}>
+                    +{formatNumber(props.budgetLines[props.saving.idBudgetLine].amount)}/mois
+                </span> : null}
+                </TableCell>
             </TableRow>
         </TableHead>
         <TableBody>

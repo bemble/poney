@@ -34,10 +34,10 @@ const useStyles = makeStyles(theme => ({
         }
     },
     income: {
-        color: green[800]
+        color: theme.palette.type === "light" ? green[800] : green[300]
     },
     expense: {
-        color: red[800]
+        color: theme.palette.type === "light" ? red[800] : red[300]
     }
 }));
 

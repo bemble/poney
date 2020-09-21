@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
             marginBottom: 0
         },
         "& .MuiTypography-colorTextSecondary": {
-            color: "rgba(0, 0, 0, 0.34)"
+            color: theme.palette.type === "light" ? "rgba(0, 0, 0, 0.34)" : "rgba(255, 255, 255, 0.34)"
         }
     },
     amount: {

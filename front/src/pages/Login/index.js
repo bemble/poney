@@ -122,7 +122,7 @@ const Login = (props) => {
             const {token} = store.getState().app;
             if (token) {
                 const {exp} = jwtDecode(token);
-                const renewAfter = (exp - Math.round((new Date) / 1000) - 5 * 60) * 1000;
+                const renewAfter = (exp - Math.round((new Date()) / 1000) - 5 * 60) * 1000;
                 setTimeout(async () => {
                     await refreshToken();
                 }, renewAfter);
@@ -154,6 +154,7 @@ const Login = (props) => {
         });
         setHasRequest(false);
         if (!tokenCallback(data)) {
+            setPassword("");
             setDisplayError(true);
         }
     };
