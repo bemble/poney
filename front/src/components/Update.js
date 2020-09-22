@@ -26,7 +26,17 @@ export default React.memo(() => {
     }, []);
 
     const updateServiceWorker = () => {
-        store.dispatch({type: 'SKIP_WAITING'});
+        const {update} = store.getState();
+        const registrationWaiting = update.serviceWorkerRegistration && update.serviceWorkerRegistration.waiting;
+        if (registrationWaiting) {
+            registrationWaiting.postMessage({type: 'SKIP_WAITING'});
+
+            registrationWaiting.addEventListener('statechange', e => {
+                if (e.target.state === 'activated') {
+                    window.location.reload(true);
+                }
+            });
+        }
     };
 
     const classes = useStyles();

@@ -16,18 +16,6 @@ export default function updateReducer(state = initialState, action) {
                 draft.serviceWorkerUpdated = !state.serviceWorkerUpdated;
                 draft.serviceWorkerRegistration = action.payload;
                 break;
-            case "SKIP_WAITING":
-                const registrationWaiting = state.serviceWorkerRegistration && state.serviceWorkerRegistration.waiting;
-                if (registrationWaiting) {
-                    registrationWaiting.postMessage({type: 'SKIP_WAITING'});
-
-                    registrationWaiting.addEventListener('statechange', e => {
-                        if (e.target.state === 'activated') {
-                            window.location.reload(true);
-                        }
-                    });
-                }
-                break;
             default:
         }
     });
