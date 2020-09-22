@@ -73,7 +73,7 @@ class Model {
 
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
         const db = await Database;
-        await db.execute(query.sql, query.values);
+        await db.run(query.sql, query.values);
 
         return Model.getOne({
             $from: jsonQuery.$table,
@@ -85,7 +85,7 @@ class Model {
         const query = Database.builder.$delete(jsonQuery);
 
         const db = await Database;
-        return db.execute(query.sql, query.values);
+        return db.run(query.sql, query.values);
     }
 }
 

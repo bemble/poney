@@ -43,7 +43,7 @@ class Projects {
         const db = await Database;
         return db.get(`SELECT COALESCE((SUM(expectedAmount) - SUM(alreadyPaidAmount) - SUM(amount)), 0) AS amount
                        FROM projectLine
-                       WHERE idProject IN (SELECT id FROM project WHERE endAt >= ?)`, ["CURRENT_TIMESTAMP"]);
+                       WHERE idProject IN (SELECT id FROM project WHERE endAt >= ?)`, [Database.currentTimestamp()]);
     }
 
     static async getTotals(id) {

@@ -2,7 +2,6 @@ const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
-const proxy = require('http-proxy-middleware');
 const cron = require("node-cron");
 
 const envFilePath = fs.realpathSync(`${__dirname}/../../data/.env`);
@@ -18,17 +17,11 @@ app.use(compression());
 const BASE_PATH = process.env.BASE_PATH || "";
 app.use(`${BASE_PATH}/api`, require("./api"));
 
-const http = require('http').createServer(app);
-
-if (process.env.APP_ENVIRONMENT === "dev") {
-    app.use('/', proxy("/", {target: 'http://localhost:3500', ws: true}));
-} else {
-    app.use(`${BASE_PATH}/`, express.static('../front/build'));
-    app.use(`${BASE_PATH}/*`, express.static('../front/build/index.html'));
-}
+app.use(`${BASE_PATH}/`, express.static('../front/build'));
+app.use(`${BASE_PATH}/*`, express.static('../front/build/index.html'));
 
 const PORT = process.env.PORT || 3100;
-http.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`Running on port ${PORT}. Home url: http://localhost:${PORT}${BASE_PATH}`);
 });
 
