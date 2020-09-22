@@ -28,8 +28,8 @@ if (dbConf.driver === "sqlite3") {
     });
     Database.builder = new SQLBuilder("MySQL");
     Database.currentTimestamp = () => new Date(moment.utc().unix() * 1000);
-    Database.unixToDbDate = (unix) => new Date(unix * 1000);
-    Database.dbDateToUnix = (date) => Math.round(date.valueOf() / 1000);
+    Database.unixToDbDate = (unix) => (unix instanceof Date) ? unix : new Date(unix * 1000);
+    Database.dbDateToUnix = (date) => (date instanceof Date) ? Math.round(date.valueOf() / 1000) : date;
 }
 
 Database.driverName = dbConf.driver;

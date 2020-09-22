@@ -16,13 +16,11 @@ class Model {
         const db = await Database;
         const rows = await db.all(query.sql, query.values);
         return (rows || []).map(e => {
-            if (Database.driverName === "mysql") {
-                Object.keys(e).forEach(key => {
-                    if (key.endsWith("At") || key === "date") {
-                        e[key] = e[key].valueOf()/1000;
-                    }
-                });
-            }
+            Object.keys(e).forEach(key => {
+                if (key.endsWith("At") || key === "date") {
+                    e[key] = Database.dbDateToUnix(e[key]);
+                }
+            });
             return e;
         });
     }
@@ -32,6 +30,11 @@ class Model {
             jsonQuery.$documents.addedAt = Database.currentTimestamp();
             jsonQuery.$documents.updatedAt = jsonQuery.$documents.addedAt;
         }
+        Object.keys(jsonQuery.$documents).forEach(key => {
+            if (key.endsWith("At") || key === "date") {
+                jsonQuery.$documents[key] = Database.unixToDbDate(jsonQuery.$documents[key]);
+            }
+        });
         const query = Database.builder.$insert(jsonQuery);
 
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
@@ -59,6 +62,13 @@ class Model {
         if (Model.AUTO_TIMESTAMPS_TABLES.indexOf(jsonQuery.$table) >= 0) {
             jsonQuery.$set.updatedAt = Database.currentTimestamp();
         }
+
+        Object.keys(jsonQuery.$set).forEach(key => {
+            if (key.endsWith("At") || key === "date") {
+                jsonQuery.$set[key] = Database.unixToDbDate(jsonQuery.$set[key]);
+            }
+        });
+
         const query = Database.builder.$update(jsonQuery);
 
         query.values = (query.values || []).map(e => e === "CURRENT_TIMESTAMP" ? Database.currentTimestamp() : e);
