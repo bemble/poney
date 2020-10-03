@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const {Model, Tools} = require('../core');
+const {Model, Tools, Tokens} = require('../core');
 const jwt = require('jsonwebtoken');
 
 router.post('/', async (req, res) => {
@@ -13,7 +13,7 @@ router.get('/token', async (req, res) => {
             throw new Error("No token");
         }
         const token = bearer.replace(/bearer\s+/i, '');
-        const decoded = jwt.verify(token, Tools.getJwtSecret(), {issuer: "Poney", audience: "auth:renew-token"});
+        const decoded = jwt.verify(token, Tokens.SECRET, {issuer: Tokens.ISSUER, audience: Tokens.AUDIENCES.RENIEW_TOKEN});
 
         return res.json(await Auth.getToken(decoded));
     } catch (e) {
@@ -45,15 +45,15 @@ class Auth {
             return null;
         }
 
-        const access_token = jwt.sign({email}, Tools.getJwtSecret(), {
+        const access_token = jwt.sign({email}, Tokens.SECRET, {
             expiresIn: "15m",
             issuer: "Poney",
-            audience: "resources:access"
+            audience: Tokens.AUDIENCES.ACCESS_RESOURCES
         });
-        const refresh_token = jwt.sign({publicId: user.publicId}, Tools.getJwtSecret(), {
+        const refresh_token = jwt.sign({publicId: user.publicId}, Tokens.SECRET, {
             expiresIn: "6h",
             issuer: "Poney",
-            audience: "auth:renew-token"
+            audience: Tokens.AUDIENCES.RENIEW_TOKEN
         });
         return {access_token, refresh_token};
     }

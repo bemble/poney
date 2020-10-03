@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const {Tools} = require('../core');
+const {Tokens} = require('../core');
 const jwt = require('jsonwebtoken');
 
 const userCheck = (req, res, next) => {
@@ -9,7 +9,7 @@ const userCheck = (req, res, next) => {
             throw new Error("No token");
         }
         const token = bearer.replace(/bearer\s+/i, '');
-        jwt.verify(token, Tools.getJwtSecret(), {issuer: "Poney", audience: "resources:access"});
+        jwt.verify(token, Tokens.SECRET, {issuer: Tokens.ISSUER, audience: Tokens.AUDIENCES.ACCESS_RESOURCES});
 
         next();
     } catch (e) {
