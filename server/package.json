@@ -27,7 +27,7 @@
     "iconv-lite": "^0.6.2",
     "json-sql-builder2": "^1.0.24",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "mysql2": "^2.1.0",
     "node-cron": "^2.0.3",
