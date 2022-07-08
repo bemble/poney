@@ -28,7 +28,7 @@
     "json-sql-builder2": "^1.0.24",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "mysql2": "^2.1.0",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
