@@ -20,7 +20,7 @@
     "db-migrate-mysql": "^2.1.1",
     "db-migrate-sqlite3": "^0.4.0",
     "dotenv": "^8.1.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "glob": "^7.1.6",
     "google-auth-library": "^5.7.0",
     "helmet": "^4.1.1",
